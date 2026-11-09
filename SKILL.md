@@ -111,13 +111,18 @@ Full detail, copy intent, and stop conditions: `references/sequences.md`. Summar
    scheduled email is visible in the admin.
 9. **Beauty + seamlessness.** Match the app's design tokens; the admin section must look native. Use
    the `reviews-to-features`-style rigor: clear hierarchy, 44px targets, accessible contrast.
+10. **Free WYSIWYG editor for email bodies.** The admin edits each email template in a **free,
+    self-hosted WYSIWYG editor** (TinyMCE Community; or Quill / TipTap / Summernote / GrapesJS).
+    Output must be **email-safe** (inline CSS, tables, ~600px, no JS), sanitized, with merge tokens,
+    a conditional-discount block, and an auto-generated plain-text twin.
 
 ---
 
 ## Admin surface (what the admin gets)
 
 - **Email Automation** menu (top-level), with tabs:
-  - **Sequences** — per-sequence on/off, delays, discounts, copy, stop conditions.
+  - **Sequences** — per-sequence on/off, delays, discounts, stop conditions, and a **free WYSIWYG
+    editor** for the email body (email-safe output, merge tokens, preview + test-send).
   - **Recipients** — table of users + emails sent/scheduled, **paginated by 100**, with *when* and
     *why* (sequence + step + trigger).
   - **Statistics** — of users who received a reminder, how many converted, revenue, and a chart by
@@ -139,7 +144,8 @@ Full UI spec: `references/admin-ui.md`.
 1. `references/discovery.md` → an **integration plan** for the specific app.
 2. New tables/migrations + the scheduler + send worker (additive).
 3. The event hooks (observe-only).
-4. The admin "Email Automation" page + tabs + statistics chart.
+4. The admin "Email Automation" page + tabs + statistics chart, including a **free WYSIWYG editor**
+   for the email body (email-safe output, merge tokens, preview + test-send).
 5. The admin-only purchased/abandoned tables.
 6. A preview/test-send tool + dry-run + rollback notes.
 7. A short **hand-off doc**: what was added, how to turn it on, how to pause, how to roll back.

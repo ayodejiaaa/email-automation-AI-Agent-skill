@@ -8,5 +8,8 @@
   - Cron-based sending engine with idempotency, stop conditions, frequency caps, quiet hours.
   - Admin dashboard: sequences, recipients log (100/page), conversion + revenue statistics, settings.
   - Admin-only purchased/abandoned tables on product & checkout pages.
+  - **Free, self-hosted WYSIWYG editor** (TinyMCE Community; Quill/TipTap/Summernote/GrapesJS) for
+    editing email bodies — email-safe HTML, merge tokens, conditional-discount block, plain-text twin,
+    preview + test-send.
   - Deliverability + compliance (SPF/DKIM/DMARC, CAN-SPAM, GDPR, unsubscribe, physical address).
   - Ships paused by default; additive schema; reuses the app's email connection.

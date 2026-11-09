@@ -20,9 +20,30 @@ Tabs: **Sequences · Recipients · Statistics · Settings**.
   Replenishment) as **cards**.
 - Each card: name, status badge (**On / Paused / Off**), counts (enrolled, sent, converted), and an
   **Edit** action.
-- Edit drawer: step list with **delay**, **discount %** (0 = hidden in email), **copy** (subject + body,
-  with preview), **stop conditions**, and **on/off**.
+- Edit drawer/page: step list with **delay**, **discount %** (0 = hidden in email), **subject + body**
+  (edited with a **free WYSIWYG editor** — see below), **stop conditions**, and **on/off**.
 - **Preview & test-send** to the admin's own email before enabling.
+
+### Email body editor (free WYSIWYG — required)
+
+The body of every step is edited with a **free, self-hosted WYSIWYG editor** — never a paid,
+cloud-only one.
+
+- **Primary:** **TinyMCE Community (self-hosted)** — familiar, mature, MIT-licensed, easy to embed.
+- **Lightweight alternatives:** **Quill**, **TipTap**, **Summernote** (all free / open-source).
+- **Drag-and-drop email builder (optional):** **GrapesJS** with the newsletter/email preset (pairs
+  with **MJML** for responsive output).
+- **Email-safe output is mandatory.** The editor must produce HTML that survives email clients:
+  table-based layout, **inline CSS**, ~600px width, alt text on images, **no `<script>`**, no external
+  stylesheets/JS, no forms. Web-only HTML breaks in Outlook/Gmail.
+- **Merge tokens:** a toolbar button inserts `{{first_name}}`, `{{product_name}}`, `{{cart_link}}`,
+  `{{discount}}`, `{{support_link}}`, `{{unsubscribe_link}}`, etc., with safe fallbacks.
+- **Conditional blocks:** the discount sentence is a conditional block that renders only when
+  discount > 0 (so a 0% email shows no discount text).
+- **Sanitize on save** with a tag/attribute allowlist (prevents XSS in the admin and in the inbox).
+- **Plain-text twin:** auto-generate a plain-text version (≥500 chars) from the HTML; store both.
+- **Preview** (desktop / mobile / dark mode) + **test-send** to the admin's own inbox.
+- **Lazy-load** the editor only on the template-edit page so the rest of the admin stays fast.
 
 ## Tab 2 — Recipients (the log)
 

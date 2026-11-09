@@ -16,6 +16,7 @@ until you say so.
 | Piece | What the admin gets |
 |-------|---------------------|
 | **Sequences** | 8 lifecycle sequences, each on/off, with editable delays, discounts, and copy |
+| **Template editor** | a **free, self-hosted WYSIWYG editor** (TinyMCE Community; or Quill/TipTap/Summernote/GrapesJS) to edit each email body — email-safe HTML, merge tokens, preview + test-send |
 | **Recipients log** | every user + emails sent/scheduled, **paginated by 100**, with *when* and *why* |
 | **Statistics** | of those who got reminders, how many converted + revenue, charted by day/week/month |
 | **Settings** | sender (from-name/email, reply-to, address), master pause, caps, quiet hours |
@@ -158,7 +159,9 @@ klaviyo alternative, mautic alternative, dittofeed alternative, email marketing 
 scheduled emails, stop conditions, frequency cap, quiet hours, personalization, one-to-one email,
 transactional vs marketing email, conversion attribution, email statistics, email analytics.
 
-Email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM, GDPR, CASL, unsubscribe,
+WYSIWYG, free WYSIWYG editor, email template editor, email body editor, rich text editor, TinyMCE,
+Quill, TipTap, Summernote, GrapesJS, MJML, email-safe HTML, inline CSS, merge tokens, template preview,
+test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM, GDPR, CASL, unsubscribe,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
 
