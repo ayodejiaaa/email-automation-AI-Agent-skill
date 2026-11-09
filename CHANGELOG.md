@@ -9,8 +9,8 @@
   purchase, birthday) in `references/sequences.md` and `references/discovery.md` §4b.
 
 ### Admin controls & health
-- **Sequence controls** — **Start / Pause / Delete** per sequence (delete is confirmed, soft-deleted and
-  restorable); bulk start/pause/delete.
+- **Sequence controls** — **Start / Pause / Delete** per sequence (delete requires typing **`delete`** in
+  a confirmation modal, then soft-deletes + is restorable); bulk start/pause/delete.
 - **Calmer admin UI** — ≤4 tabs, one primary action per view, details in a slide-over drawer, secondary/
   destructive actions in an overflow (`⋯`) menu, advanced settings collapsed, health banners only when
   there's a problem.

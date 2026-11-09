@@ -33,7 +33,7 @@ nothing breaks and nothing sends until you say so.
 | **Sequences** | 8 lifecycle sequences, each on/off, with editable delays, discounts, and copy |
 | **Template editor** | a **free, self-hosted WYSIWYG editor** (TinyMCE Community; or Quill/TipTap/Summernote/GrapesJS) to edit each email body — email-safe HTML, merge tokens, preview + test-send |
 | **Editable sequences** | admin can **add / reorder / delete steps**; a new step also schedules for active enrolments |
-| **Sequence controls** | **Start / Pause / Delete** each sequence — delete is confirmed and soft-deleted (restorable) |
+| **Sequence controls** | **Start / Pause / Delete** each sequence — delete requires typing **`delete`** in a confirmation modal, then soft-deletes (restorable) |
 | **Clean admin** | calm, uncluttered layout — ≤4 tabs, one primary action per view, details in drawers, secondary actions in an overflow menu |
 | **Platform-aware sequences** | scouts your app's purpose and adds the reminders that fit — **email verification, profile completion, onboarding, KYC, billing/trial, booking, renewal**… |
 | **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |

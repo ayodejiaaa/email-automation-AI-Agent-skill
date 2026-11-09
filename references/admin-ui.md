@@ -67,11 +67,12 @@ Clicking the card opens the **edit drawer** — it does **not** expand everythin
   steps (never back-fills past ones).
 - **Overflow `⋯` menu** for secondary actions: Edit · Duplicate · View statistics · **Delete**. Never a
   row of 4+ buttons.
-- **Delete** is destructive and gated: a confirmation dialog explains *"This cancels all scheduled
-  emails for this sequence and removes it. Users already emailed are unaffected; the sent log is kept.
-  This can't be undone."* Require a confirm (type the name or tick a box). Deleting cancels the
-  `email_scheduled` rows and **soft-deletes** the sequence (keeps `email_sent`); offer **restore** for
-  30 days.
+- **Delete** is destructive and gated by a **confirmation modal**. It explains *"This cancels all
+  scheduled emails for this sequence and removes it. Users already emailed are unaffected; the sent log
+  is kept. This can't be undone."* The admin must **type the word `delete`** (case-insensitive) to
+  enable the final **Delete** button — the button stays disabled until the input matches, and the field
+  is not pre-filled. Deleting cancels the `email_scheduled` rows and **soft-deletes** the sequence
+  (keeps `email_sent`); offer **restore** for 30 days.
 - **Bulk** (optional): select several → Start / Pause / Delete, behind a "Bulk" menu.
 
 ### Edit drawer
@@ -222,6 +223,8 @@ When disabled, the table disappears from product/checkout pages but the automati
 - **Empty states** with a next action.
 - **Loading** skeletons for tables/charts; **errors** inline and actionable.
 - **Destructive** actions (delete a sequence, delete a step, exclude a user) confirmed with consequences.
+  Deleting a **sequence** requires typing the word **`delete`** in a confirmation modal before the
+  Delete button enables.
 - **Responsive**: tables scroll or collapse to cards on mobile; charts resize.
 - **Accessible**: labelled inputs, focus rings, keyboard-navigable tabs, chart data mirrored as a table
   for screen readers.
