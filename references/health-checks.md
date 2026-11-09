@@ -29,7 +29,8 @@ Order of priority: **no transport → scheduler down → paused.**
 - Or fill the app's built-in **mail settings** page (link it).
 - Then click **Send test email** to confirm.
 
-**Do:** never store secrets in the automation tables; read the app's config. Never send if this check
+**Do:** never store email secrets in the automation tables; read the app's config. (Only credentials for a
+new push/SMS/WhatsApp provider are stored, encrypted at rest.) Never send if this check
 fails.
 
 ---

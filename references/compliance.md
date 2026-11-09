@@ -8,7 +8,8 @@ The legal mechanics, as concrete components (not just prose). Ship these with th
 
 - At signup, show an **unchecked** marketing-consent checkbox (or a clear opt-in clause) linked to the
   privacy policy. Record `consent_marketing = true/false`, `consent_at`, `consent_ip`, `consent_source`.
-- Only email users whose `consent_marketing` is true (or where a lawful basis exists).
+- Only email users whose `consent_marketing` is true (or where a lawful basis exists). **Default is
+  false**: never assume consent.
 - **Double opt-in** (recommended): send a confirmation email; only activate marketing after the click.
 
 ## Per-channel consent (push, SMS, WhatsApp)
@@ -28,10 +29,12 @@ GET  /unsubscribe?token=<signed>   → preference page
 POST /unsubscribe                  → one-click (List-Unsubscribe-Post)
 ```
 
-- The token is **signed** (HMAC or JWT) and encodes the user/email — not a guessable numeric id.
+- The token is **signed** (HMAC or JWT, secret ≥16 chars) and encodes the user/email — not a guessable
+  numeric id. Signed, not encrypted: anyone with the link can read it. Give it an expiry and validate the payload.
 - `POST` honours `List-Unsubscribe=One-Click`; it must work **without login**.
 - On unsubscribe: insert into `email_suppressions` (reason `unsubscribed`), cancel future scheduled
-  emails for that user, and show a confirmation page (no login required).
+  emails for that user, and show a confirmation page (no login required). Suppress by **user id and
+  normalized email**, so changing address doesn't undo it.
 - Support **unsubscribe from all** and from a specific sequence.
 
 ```
@@ -68,7 +71,8 @@ POST /webhooks/email   ← provider (SendGrid/Mailgun/Postmark/SES)
 ## 6. Retention & data rights
 
 - `email_sent` (PII) — set a retention window (e.g. 24 months) and a scheduled purge.
-- Honour **erasure**: deleting a user anonymises/removes their `email_sent`/`email_scheduled` rows.
+- Honour **erasure**: remove the user's `email_sent`/`email_scheduled` rows, consent, exclusions and
+  channel records. Keep the email suppression entry so an opt-out is still honoured.
 - Provide **data export** of the user's automation history on request.
 
 ## 7. Physical address & sender identity

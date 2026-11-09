@@ -41,6 +41,7 @@ The worker must, at send time, verify the user still qualifies:
 if user unsubscribed            → cancel + suppress
 if address hard-bounced / complaint → cancel + suppress
 if step.stop_condition_met(user)   → cancel (e.g. purchased, logged in, activated)
+if the check itself errors         → defer, never send (fail closed)
 if frequency cap would be exceeded → defer to next allowed window
 if within quiet hours              → defer
 else                               → send, mark sent, log
@@ -59,7 +60,8 @@ double-sends. Use a unique `(enrollment_id, step_id)` constraint.
 
 ## Failure handling
 
-- Retry transient send failures with backoff (max 3); mark permanent failures and suppress.
+- Retry transient send failures with backoff (max 3); mark permanent failures and suppress. Pass the row
+  id to the provider as an idempotency key (delivery is at-least-once).
 - Never lose a scheduled email silently — surface failures in the admin log.
 - Log **why** each email was sent (sequence + step + triggering event) and **why** each was cancelled.
 
