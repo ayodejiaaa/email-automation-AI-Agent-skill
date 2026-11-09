@@ -37,6 +37,7 @@ nothing breaks and nothing sends until you say so.
 | **Clean admin** | calm, uncluttered layout — ≤4 tabs, one primary action per view, details in drawers, secondary actions in an overflow menu |
 | **Designed with the UI/UX laws skill** | the page is built under `ui-ux-20-laws` — every decision (tabs, targets, drawers, states) is mapped to a law, with a Trace block + pre-ship checklist |
 | **Platform-aware sequences** | scouts your app's purpose and adds the reminders that fit — **email verification, profile completion, onboarding, KYC, billing/trial, booking, renewal**… |
+| **Multi-channel** | **email · push · WhatsApp · SMS** — reuses existing providers or lets the admin add API keys; users opt in per channel |
 | **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |
 | **User controls** | search a user by email, expand their sequence with a caret, **cancel one specific email** or **exclude the user** from all automation |
 | **Recipients log** | every user + emails sent/scheduled, **paginated by 100**, with *when* and *why* |
@@ -75,6 +76,16 @@ nothing breaks and nothing sends until you say so.
 6. **Rollback** — disable stops all sends; dropping the new tables removes it cleanly.
 
 ---
+
+## Channels — email, push, WhatsApp, SMS
+
+Reminders go out on **email, push notifications, WhatsApp, and SMS**. The skill **detects and reuses**
+whatever the app already has (FCM/APNs/OneSignal, Twilio/Vonage, WhatsApp Cloud API). If a channel is
+missing, the admin adds its API key on **Settings → Channels** and sends a test.
+
+Users are asked to opt in at the right moment — the push permission prompt, or a verified phone number
+with an unchecked consent box for SMS/WhatsApp. Only opted-in channels are used, and email stays the
+always-available fallback. Each channel has its own consent, suppression, limits, and quiet hours.
 
 ## What makes the emails good
 
@@ -206,7 +217,10 @@ test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
 
-Transactional email, marketing email, transactional vs marketing, consent, holdout group, sequence
+Push notifications, web push, push reminders, whatsapp reminders, whatsapp cloud api, sms reminders,
+sms automation, multi-channel notifications, notification automation, FCM, APNs, OneSignal, Twilio,
+Vonage, messagebird, opt-in prompts, push permission, transactional email, marketing email,
+transactional vs marketing, consent, holdout group, sequence
 precedence, max active sequence, quiet hours timezone, max deferral, unsubscribe token, mustache,
 email render test, CI, pause sequence, start sequence, delete sequence, soft delete, restore sequence,
 clean admin UI,

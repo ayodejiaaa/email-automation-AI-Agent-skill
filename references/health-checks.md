@@ -81,6 +81,13 @@ link straight to the toggle.
 
 ---
 
+## 4. A channel isn't configured (warning)
+
+If a sequence uses push / SMS / WhatsApp but there's no provider or credentials, show:
+*"Push reminders are paused — no provider configured."* → link to **Settings → Channels**. Show the
+status per channel (Configured / Not configured / Off). Existing providers are reused automatically;
+missing ones need credentials.
+
 ## Banner component (consistent)
 
 - **Icon + short title + one-line reason.**

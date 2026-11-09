@@ -20,7 +20,8 @@ skill isn't available, the same rules apply inline there.)
 
 Add one top-level menu item: **"Email Automation"** (mail icon), placed near other management items.
 
-Tabs: **Sequences · Users & recipients · Statistics · Settings**.
+Tabs: **Sequences · Users & recipients · Statistics · Settings**. *(Channels live inside Settings —
+not a fifth tab.)*
 
 ---
 
@@ -166,6 +167,21 @@ The payoff: **do reminders convert?**
 - **Attribution window** (default 7 days).
 - **Admin tables toggle** (see below) + instructions.
 - Test-send button.
+
+### Channels (email · push · WhatsApp · SMS)
+
+A per-channel panel inside Settings. For each channel show a status badge (**Configured / Not
+configured / Off**) and:
+
+- **Detected provider** — if the app already has one (FCM/APNs/OneSignal, Twilio/Vonage, WhatsApp Cloud
+  API), show it and reuse it. **Don't add a second provider for the same channel.**
+- **Credentials** (only when none exists): API key / secret / sender ID / number — stored **encrypted**,
+  never logged.
+- **Send test** and an **enable/disable** toggle per channel.
+- A link to the provider's setup docs.
+
+If a channel has no provider/credentials, any sequence using it is blocked and a health warning is shown
+(`references/health-checks.md`). Full channel rules: `references/channels.md`.
 
 ---
 

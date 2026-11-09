@@ -2,6 +2,20 @@
 
 ## [1.0.0] — 2026-11-09
 
+### Multi-channel (email · push · WhatsApp · SMS)
+- **Channels**: detect and reuse the app's existing push/SMS/WhatsApp provider; otherwise the admin adds
+  API keys in **Settings → Channels** (test-send, enable/disable). New `references/channels.md`.
+- **Per-channel consent + suppression** in the worker (tested): non-email steps require explicit opt-in
+  and are blocked by per-channel suppression; channel errors never crash the worker.
+- **Opt-in prompts**: `references/opt-in-prompts.md` — prompt at the value moment, verify phone,
+  handle push denial, never nag.
+- **Channel helpers** (`examples/channels.mjs`, tested): channel fallback resolution, SMS segmentation
+  (160/153 GSM-7, 70/67 UCS-2), push payload size, WhatsApp 24h template rule.
+- Docs: `discovery.md` (detect providers), `sending-and-compliance.md` (per-channel limits),
+  `compliance.md` (TCPA/WhatsApp/push), `admin-ui.md` (Channels panel), `health-checks.md` (channel
+  not configured), `data-model.md` (channel tables), `sequence-config.json` (channels), and
+  `examples/message-templates.md` (push/SMS/WhatsApp samples).
+
 ### Design
 - **The admin page is now built with the `ui-ux-20-laws` skill** — added
   `references/admin-design-laws.md` (per-surface law map, Audit → Implement → Trace, pre-ship

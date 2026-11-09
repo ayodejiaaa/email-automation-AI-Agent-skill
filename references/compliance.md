@@ -11,6 +11,16 @@ The legal mechanics, as concrete components (not just prose). Ship these with th
 - Only email users whose `consent_marketing` is true (or where a lawful basis exists).
 - **Double opt-in** (recommended): send a confirmation email; only activate marketing after the click.
 
+## Per-channel consent (push, SMS, WhatsApp)
+
+- **Push:** opt-in + permission granted + a valid device token; remove tokens the provider reports invalid.
+- **SMS:** explicit opt-in (**TCPA** in the US); verified number; honor `STOP`/opt-out keywords
+  immediately; include opt-out instructions in the message.
+- **WhatsApp:** explicit opt-in (Meta requires it); **approved templates** for the first message; honor
+  opt-out.
+- Store consent **per channel** with timestamp + source. Unsubscribing from one channel must not silently
+  enrol the user in another.
+
 ## 2. Unsubscribe endpoint (signed + one-click)
 
 ```

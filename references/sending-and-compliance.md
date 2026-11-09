@@ -130,6 +130,17 @@ not as the strategy.
   scheduled rows are cancelled on enrolment). This guard keeps many enabled sequences from turning into
   spam. Implemented in `examples/worker.mjs`.
 
+## Multi-channel sending (email · push · WhatsApp · SMS)
+
+- All channels share the scheduler, stop-conditions and the "one active marketing sequence" rule, but
+  each has its **own consent, suppression, provider limits and quiet hours**.
+- Resolve usable channels per user (`references/channels.md`, `examples/channels.mjs`) and fall back if
+  the first fails at send time.
+- Provider constraints: push payload **≤4KB**; SMS **160 GSM‑7** (153/part) or UCS‑2 70/67; WhatsApp
+  **approved template** outside the 24h window; email SPF/DKIM/DMARC.
+- **Cross-channel frequency cap** — don't email + text + push the same user the same day.
+- A channel error must never crash the worker.
+
 ## The pause-by-default contract
 
 - On install, **everything is paused** (master switch OFF, no sequence active).

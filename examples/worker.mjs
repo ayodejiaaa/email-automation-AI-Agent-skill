@@ -35,6 +35,8 @@ export class MemoryStore {
     this.users = new Map(); // userId -> { email }
     this.exclusions = new Set(); // `${userId}:${stepId}`
     this.sequences = new Map(); // key -> { kind, priority }
+    this.channelConsent = new Map(); // `${userId}:${channel}` -> boolean
+    this.channelSuppressed = new Map(); // `${userId}:${channel}` -> reason
   }
 
   setUser(userId, { email, timezoneOffsetMinutes = 0, consentMarketing = true }) {
@@ -53,6 +55,19 @@ export class MemoryStore {
   }
   hasConsent(userId) {
     return this.consent.get(userId) === true;
+  }
+  setChannelConsent(userId, channel, value) {
+    this.channelConsent.set(`${userId}:${channel}`, value);
+  }
+  hasChannelConsent(userId, channel) {
+    if (channel === 'email') return this.hasConsent(userId);
+    return this.channelConsent.get(`${userId}:${channel}`) === true;
+  }
+  suppressChannel(userId, channel, reason) {
+    this.channelSuppressed.set(`${userId}:${channel}`, reason);
+  }
+  isChannelSuppressed(userId, channel) {
+    return this.channelSuppressed.has(`${userId}:${channel}`);
   }
   suppress(email, reason) {
     if (email) this.suppressions.set(email, reason);
@@ -84,6 +99,7 @@ export class MemoryStore {
       lockedAt: null,
       kind: KIND.MARKETING,
       group: 'treatment',
+      channel: 'email',
       ...row,
     });
   }
@@ -110,6 +126,7 @@ export class MemoryStore {
       stepId: row.stepId,
       sequenceKey: row.sequenceKey,
       kind: row.kind,
+      channel: row.channel,
       sentAt: now,
     });
   }
@@ -240,6 +257,7 @@ export class EmailWorker {
         kind: meta.kind,
         priority: meta.priority,
         group,
+        channel: step.channel ?? 'email',
       });
       scheduled += 1;
     }
@@ -259,6 +277,21 @@ export class EmailWorker {
     for (const row of this.store.dueScheduled(now, limit)) {
       if (!this.store.claim(row.id, now)) continue;
       const email = this.store.emailOf(row.userId);
+      const channel = row.channel ?? 'email';
+
+      // Non-email channels require explicit per-channel opt-in + are per-channel suppressed.
+      if (channel !== 'email') {
+        if (!this.store.hasChannelConsent(row.userId, channel)) {
+          this.store.markCancelled(row.id, 'no-channel-consent');
+          report.cancelled += 1;
+          continue;
+        }
+        if (this.store.isChannelSuppressed(row.userId, channel)) {
+          this.store.markCancelled(row.id, 'channel-suppressed');
+          report.cancelled += 1;
+          continue;
+        }
+      }
 
       if (row.kind === KIND.MARKETING) {
         if (this.store.isSuppressed(email)) {
@@ -317,7 +350,7 @@ export class EmailWorker {
       }
 
       try {
-        await this.sendEmail({ userId: row.userId, stepId: row.stepId, kind: row.kind, rowId: row.id });
+        await this.sendEmail({ userId: row.userId, stepId: row.stepId, kind: row.kind, channel, rowId: row.id });
         this.store.markSent(row.id, now);
         report.sent += 1;
       } catch (err) {

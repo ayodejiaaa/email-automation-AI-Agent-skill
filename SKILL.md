@@ -1,13 +1,15 @@
 ---
 name: email-automation
 description: >-
-  Build a non-disruptive "Email Automation" section inside an app's admin panel: lifecycle reminders
-  (welcome, abandoned cart, post-purchase, upsell, win-back) with proven funnel timing, personal copy,
-  a free WYSIWYG editor, conversion stats, and admin-only tables. Ships paused and reuses the app's
-  email connection. Use for email automation, drip/lifecycle email, abandoned-cart recovery, or an
-  "Email Automation" admin menu. Triggers: "email automation", "drip campaign", "abandoned cart
-  emails", "reminder emails", "lifecycle emails", "welcome sequence", "win-back emails", "upsell
-  emails".
+  Build a non-disruptive automation section inside an app's admin panel: lifecycle reminders (welcome,
+  abandoned cart, post-purchase, upsell, win-back) across **email, push notifications, WhatsApp, and
+  SMS**, with proven funnel timing, personal copy, a free WYSIWYG editor, conversion stats, and
+  admin-only tables. Reuses the app's existing email/notification/SMS/WhatsApp providers, or lets the
+  admin add API keys. Ships paused. Use for email automation, drip/lifecycle email, abandoned-cart
+  recovery, push/WhatsApp/SMS reminders, or an "Email Automation" admin menu. Triggers: "email
+  automation", "drip campaign", "abandoned cart emails", "reminder emails", "lifecycle emails", "welcome
+  sequence", "win-back emails", "upsell emails", "push notifications", "whatsapp reminders", "sms
+  reminders", "notification automation".
 ---
 
 # Email Automation — Admin Section Builder
@@ -134,6 +136,10 @@ the ones the platform can detect and act on (`references/sequences.md`).
     (verification/KYC/billing) bypasses them. Enforce **≤1 active marketing sequence per user**, plus
     consent, holdout, exclusions, quiet hours in the user's timezone, retry caps and max deferrals —
     implemented and tested in `examples/worker.mjs` + `worker.test.mjs`.
+12. **Multi-channel with per-channel consent.** Email is the baseline; **push / WhatsApp / SMS require
+    explicit opt-in** and per-channel suppression. **Reuse the app's existing providers**; only add
+    credentials when none exists (Settings → Channels). Prefer push → email → WhatsApp → SMS with
+    fallback, and never send on two channels the same day. See `references/channels.md`.
 
 ---
 
@@ -167,7 +173,8 @@ the ones the platform can detect and act on (`references/sequences.md`).
   - **Statistics** — of users who received a reminder, how many converted, revenue, chart by
     **day / week / month**.
   - **Settings** — sender (from-name/from-email/reply-to/physical address), master pause, caps,
-    quiet hours.
+    quiet hours, and a **Channels** panel (email · push · WhatsApp · SMS): detect/reuse the app's
+    provider or add API keys, test-send, enable/disable.
 - **Admin-only tables** at the bottom of **product** and **checkout** pages:
   - Tabs **Purchased** / **Abandoned** — clearly marked *"Admin only"*.
   - Columns: email (→ user panel), registration/login/abandon datetimes, would-have-paid amount,
@@ -216,6 +223,8 @@ Full UI spec: `references/admin-ui.md`.
   admin-only tables, WYSIWYG, add/edit steps.
 - `references/admin-design-laws.md` — the page mapped to the 20 UI/UX laws (Audit → Trace → checklist).
 - `references/health-checks.md` — pause / cron-not-running / no-transport warnings with fix guidance.
+- `references/channels.md` — multi-channel (email · push · WhatsApp · SMS), detection, consent, limits.
+- `references/opt-in-prompts.md` — when and how to ask users to enable push/SMS/WhatsApp.
 - `references/wysiwyg.md` — reuse an existing editor, else add one; email-safe pipeline.
 - `references/quickstart.md` — the one-page path.
 - `examples/render.mjs` + `render.test.mjs` — Mustache email renderer + 0%-discount test.

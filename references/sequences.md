@@ -15,6 +15,9 @@ and every sequence is capped and respects frequency limits.
 >   discount at all**.
 > - **First email = no discount** (discounting early trains users to wait).
 > - **Bounded and suppressed.** Respect unsubscribe, hard bounce, spam complaint, and frequency caps.
+> - **Channel-aware.** A step may target email, push, WhatsApp, or SMS. Prefer push → email → WhatsApp →
+>   SMS with fallback. Non-email channels require **explicit opt-in** and per-channel suppression
+>   (`references/channels.md`).
 
 ---
 

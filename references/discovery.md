@@ -28,6 +28,17 @@
   system. **This system must reuse it — never add a second connection.**
 - Note the **from address** currently used, and whether SPF/DKIM/DMARC are configured.
 
+## 3b. Detect existing push / SMS / WhatsApp infrastructure
+
+Before adding providers, check what the app already uses:
+
+- **Push:** FCM, APNs, OneSignal, web-push, Pusher Beams, Airship — or the framework's notification system.
+- **SMS:** Twilio, MessageBird, Vonage/Nexmo, AWS SNS, Africa's Talking, Termii (`TWILIO_*` etc. in env).
+- **WhatsApp:** Meta WhatsApp Cloud API, Twilio WhatsApp, 360dialog, Wati, Gupshup.
+
+**If a provider exists → reuse its sender and credentials.** If it doesn't → plan to add credentials on
+the admin **Channels** tab (`references/channels.md`). Never add a second provider for the same channel.
+
 ## 4. Map the domain
 
 | Object | What to find |

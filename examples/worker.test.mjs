@@ -199,3 +199,38 @@ test('erasing a user removes their scheduled rows and sent log', async () => {
   assert.equal([...store.rows.values()].filter((r) => r.userId === 'u1').length, 0);
   assert.equal(store.emailOf('u1'), null);
 });
+
+test('non-email channels require explicit opt-in', async () => {
+  const { store, worker, sent } = setup();
+  store.setUser('u1', { email: 'u1@example.com' });
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'welcome', stepDefs: [{ id: 's1', delayMinutes: 0, channel: 'push' }], at: 0 });
+
+  const r = await worker.processDue();
+  assert.equal(r.cancelled, 1);
+  assert.equal(sent.length, 0);
+  assert.match([...store.rows.values()][0].reason, /no-channel-consent/);
+});
+
+test('an opted-in push step is sent on the push channel', async () => {
+  const { store, worker, sent } = setup();
+  store.setUser('u1', { email: 'u1@example.com' });
+  store.setChannelConsent('u1', 'push', true);
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'welcome', stepDefs: [{ id: 's1', delayMinutes: 0, channel: 'push' }], at: 0 });
+
+  const r = await worker.processDue();
+  assert.equal(r.sent, 1);
+  assert.equal(sent[0].channel, 'push');
+});
+
+test('a suppressed channel is cancelled', async () => {
+  const { store, worker, sent } = setup();
+  store.setUser('u1', { email: 'u1@example.com' });
+  store.setChannelConsent('u1', 'sms', true);
+  store.suppressChannel('u1', 'sms', 'opted-out');
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'welcome', stepDefs: [{ id: 's1', delayMinutes: 0, channel: 'sms' }], at: 0 });
+
+  const r = await worker.processDue();
+  assert.equal(r.cancelled, 1);
+  assert.equal(sent.length, 0);
+  assert.match([...store.rows.values()][0].reason, /channel-suppressed/);
+});

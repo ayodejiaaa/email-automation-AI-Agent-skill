@@ -35,12 +35,14 @@ email_scheduled
   status(scheduled | sending | sent | cancelled | failed),
   locked_at, attempts(int), deferrals(int, default 0), error(text),
   kind(varchar), priority(int), group(treatment | holdout),
+  channel(varchar, default 'email'),           -- email | push | whatsapp | sms
   UNIQUE(enrollment_id, step_id)      -- idempotency: never double-schedule
 
 email_sent                                   -- immutable audit log
   id, user_id FK, enrollment_id FK, step_id FK,
   sequence_key, step_position,
-  sent_at, to_email, from_email, subject, ab_variant,
+  sent_at, channel(varchar, default 'email'), provider_message_id(varchar, nullable),
+  to_email, from_email, subject, ab_variant,
   status(delivered | bounced | complained),
   trigger_reason(varchar),            -- "what & why" for the admin log
   converted_at(nullable),             -- attribution
@@ -61,6 +63,20 @@ email_suppressions
   id, email (unique), reason(unsubscribed | hard_bounce | complaint | admin),
   sequence_key(varchar, nullable),    -- null = all sequences
   created_at
+
+channel_settings                              -- provider + credentials per channel
+  id, channel(email | push | whatsapp | sms), provider(varchar),
+  credentials_encrypted(jsonb),               -- API key/secret/sender — encrypt at rest
+  sender(varchar, nullable),                  -- from-number / sender ID
+  enabled(bool, default false), created_at, updated_at
+
+channel_consent                               -- explicit opt-in per user per channel
+  id, user_id FK, channel, consent(bool), verified_at(nullable), source(varchar), updated_at,
+  UNIQUE(user_id, channel)
+
+channel_suppressions                          -- per-channel suppression
+  id, user_id FK, channel, reason(invalid_token | hard_bounce | opt_out | complaint),
+  created_at, UNIQUE(user_id, channel)
 
 email_step_exclusions                       -- admin excluded a user from ONE specific email
   id, user_id FK, step_id FK, reason(varchar), created_at,
@@ -98,6 +114,8 @@ admin_audit
 - **`group`** — `treatment` | `holdout` (holdout receives no marketing email).
 - **`copy` keys** in `sequence-config.json` map to `templates` (subject/body) defined in the DB or
   `examples/email-templates.md`.
+- **`channel`** — `email | push | whatsapp | sms`; non-email channels require `channel_consent` and are
+  blocked by `channel_suppressions`. `users` should hold a **verified phone** and **push tokens**.
 
 ## Retention & privacy
 
