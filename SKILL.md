@@ -140,12 +140,16 @@ the ones the platform can detect and act on (`references/sequences.md`).
 
 ## Admin surface (what the admin gets)
 
-- **Health banners** at the top of every tab: **no email transport configured**, **scheduler/cron not
-  running** (with a detailed why + how-to-fix), and **automation paused**. See
-  `references/health-checks.md`.
+- **Calm, uncluttered layout** — ≤4 tabs, one primary action per view, details in a drawer, secondary/
+  destructive actions in an overflow (`⋯`) menu, advanced settings collapsed, health banners only when
+  needed.
+- **Health banners** at the top of every tab (only when there's a problem): **no email transport
+  configured**, **scheduler/cron not running** (with a detailed why + how-to-fix), and **automation
+  paused**. See `references/health-checks.md`.
 - **Email Automation** menu (top-level), with tabs:
-  - **Sequences** — per-sequence on/off, delays, discounts, stop conditions, a **free WYSIWYG editor**,
-    and **add / reorder / delete steps** (a new step also schedules for active enrolments).
+  - **Sequences** — per-sequence **Start / Pause / Delete** (delete is confirmed + soft-deleted/
+    restorable, tucked into `⋯`), delays, discounts, stop conditions, a **free WYSIWYG editor**, and
+    **add / reorder / delete steps**.
   - **Users & recipients** — search a user by email; expand their **sequence of emails** with the down
     caret; **cancel a specific email** or **exclude the user completely**; plus the full sent log
     **paginated by 100** with *when* and *why*.

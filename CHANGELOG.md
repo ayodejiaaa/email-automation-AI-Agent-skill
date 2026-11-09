@@ -9,6 +9,11 @@
   purchase, birthday) in `references/sequences.md` and `references/discovery.md` §4b.
 
 ### Admin controls & health
+- **Sequence controls** — **Start / Pause / Delete** per sequence (delete is confirmed, soft-deleted and
+  restorable); bulk start/pause/delete.
+- **Calmer admin UI** — ≤4 tabs, one primary action per view, details in a slide-over drawer, secondary/
+  destructive actions in an overflow (`⋯`) menu, advanced settings collapsed, health banners only when
+  there's a problem.
 - **Add / reorder / delete sequence steps** from the admin (new steps also schedule for active enrolments).
 - **Users tab** — search a user by email, expand their sequence with the down caret, **cancel a
   specific email**, or **exclude the user** from all automation (with audit + re-include).

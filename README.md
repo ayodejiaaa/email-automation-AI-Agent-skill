@@ -33,6 +33,8 @@ nothing breaks and nothing sends until you say so.
 | **Sequences** | 8 lifecycle sequences, each on/off, with editable delays, discounts, and copy |
 | **Template editor** | a **free, self-hosted WYSIWYG editor** (TinyMCE Community; or Quill/TipTap/Summernote/GrapesJS) to edit each email body — email-safe HTML, merge tokens, preview + test-send |
 | **Editable sequences** | admin can **add / reorder / delete steps**; a new step also schedules for active enrolments |
+| **Sequence controls** | **Start / Pause / Delete** each sequence — delete is confirmed and soft-deleted (restorable) |
+| **Clean admin** | calm, uncluttered layout — ≤4 tabs, one primary action per view, details in drawers, secondary actions in an overflow menu |
 | **Platform-aware sequences** | scouts your app's purpose and adds the reminders that fit — **email verification, profile completion, onboarding, KYC, billing/trial, booking, renewal**… |
 | **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |
 | **User controls** | search a user by email, expand their sequence with a caret, **cancel one specific email** or **exclude the user** from all automation |
@@ -194,7 +196,9 @@ test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
 
-Add email step, edit sequence, cancel scheduled email, exclude user, user search, email automation
+Pause sequence, start sequence, delete sequence, soft delete, restore sequence, clean admin UI,
+uncluttered admin, information architecture, progressive disclosure, admin design, add email step, edit
+sequence, cancel scheduled email, exclude user, user search, email automation
 health, cron not running, scheduler heartbeat, SMTP not configured, email transport missing, send test
 email, pause warning, admin user management, per-email cancellation, resend control, non-disruptive,
 reversible migration, migration rollback, feature flag, kill switch, event observer,

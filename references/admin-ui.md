@@ -1,8 +1,13 @@
 # Admin UI — the Email Automation section
 
-A first-class, beautiful admin area that matches the app's existing design. Use its design tokens
-(spacing, type, color, radius). If the app has no admin theme, apply the 20-laws rules: clear
-hierarchy, ≤5 top-level tabs, 44px targets, 4.5:1 contrast, empty/loading/error states.
+A first-class, **calm and uncluttered** admin area that matches the app's existing design. Use its
+design tokens (spacing, type, color, radius). If the app has no admin theme, apply the 20-laws rules:
+clear hierarchy, ≤4 top-level tabs, 44px targets, 4.5:1 contrast, empty/loading/error states.
+
+**Clarity is the feature.** The admin should never face a wall of controls. Show **one primary action
+per view**, tuck secondary/destructive actions into an overflow (`⋯`) menu, and put advanced config
+behind a drawer or a collapsible "Advanced" section. If a control doesn't help the current task, hide
+it.
 
 ---
 
@@ -11,6 +16,22 @@ hierarchy, ≤5 top-level tabs, 44px targets, 4.5:1 contrast, empty/loading/erro
 Add one top-level menu item: **"Email Automation"** (mail icon), placed near other management items.
 
 Tabs: **Sequences · Users & recipients · Statistics · Settings**.
+
+---
+
+## Information architecture (keep it uncluttered)
+
+- **Four tabs max:** Sequences · Users & recipients · Statistics · Settings. Nothing else in the
+  top-level nav.
+- **One primary action per view** (Sequences → "Add step" / "Edit"; Users → search; Statistics → time
+  range; Settings → "Save").
+- **Progressive disclosure:** the list stays scannable; details open in a **side drawer**, not a page
+  that shows everything at once. Advanced settings collapse under "Advanced".
+- **Overflow menu (`⋯`) per row/card** for secondary actions (Start/Pause, Duplicate, Statistics,
+  Delete). Never a row of 4+ buttons.
+- **Search & filters** live in the list toolbar, collapsed under a "Filter" button when not needed.
+- **Health banners only when there's a problem** — hide them when all checks pass so the page stays calm.
+- **One visual language:** one button style, one badge style, one drawer pattern throughout.
 
 ---
 
@@ -36,13 +57,28 @@ Re-check on load + every 60s + a manual "Re-check".
 
 ## Tab 1 — Sequences
 
-- A list of the 8 sequences (Welcome, No-login, Re-engage, Abandoned cart, Review, Upsell, Win-back,
-  Replenishment) as **cards**.
-- Each card: name, status badge (**On / Paused / Off**), counts (enrolled, sent, converted), and an
-  **Edit** action.
-- Edit drawer/page: step list with **delay**, **discount %** (0 = hidden in email), **subject + body**
-  (edited with a **free WYSIWYG editor** — see below), **stop conditions**, and **on/off**.
-- **Preview & test-send** to the admin's own email before enabling.
+A calm, scannable list of sequences (the default 8 + any platform-derived ones). Each is a **card**
+showing: name, **status badge** (Running / Paused / Off), and counts (enrolled · sent · converted).
+Clicking the card opens the **edit drawer** — it does **not** expand everything inline.
+
+### Per-sequence controls (Start · Pause · Delete)
+
+- **Start / Pause** — one clear toggle on the card. Starting a paused sequence schedules only *future*
+  steps (never back-fills past ones).
+- **Overflow `⋯` menu** for secondary actions: Edit · Duplicate · View statistics · **Delete**. Never a
+  row of 4+ buttons.
+- **Delete** is destructive and gated: a confirmation dialog explains *"This cancels all scheduled
+  emails for this sequence and removes it. Users already emailed are unaffected; the sent log is kept.
+  This can't be undone."* Require a confirm (type the name or tick a box). Deleting cancels the
+  `email_scheduled` rows and **soft-deletes** the sequence (keeps `email_sent`); offer **restore** for
+  30 days.
+- **Bulk** (optional): select several → Start / Pause / Delete, behind a "Bulk" menu.
+
+### Edit drawer
+
+A slide-over drawer (not a cluttered new page) with the step list (delay, discount %, subject, body via
+the free WYSIWYG, stop condition), **Add step** (see below), preview + test-send, and a collapsible
+**Advanced** section (precedence, holdout %, A/B). The list page stays clean because details live here.
 
 ### Add / edit steps (admin can extend a sequence)
 
@@ -184,13 +220,23 @@ When disabled, the table disappears from product/checkout pages but the automati
 ## Design & states
 
 - **Empty states** with a next action.
-- **Loading** skeletons for tables/charts.
-- **Errors** are inline and actionable.
-- **Destructive** actions (delete a sequence) confirmed.
+- **Loading** skeletons for tables/charts; **errors** inline and actionable.
+- **Destructive** actions (delete a sequence, delete a step, exclude a user) confirmed with consequences.
 - **Responsive**: tables scroll or collapse to cards on mobile; charts resize.
-- **Accessible**: labelled inputs, focus rings, keyboard-navigable tabs, chart data available as a
-  table for screen readers.
+- **Accessible**: labelled inputs, focus rings, keyboard-navigable tabs, chart data mirrored as a table
+  for screen readers.
 - **Seamless**: reuse the app's admin layout, sidebar, buttons, and colors — it should look native.
+
+### Keep it uncluttered (do / don't)
+
+- **Do** show one primary action per view; put the rest in `⋯`.
+- **Do** use a drawer for details so the list stays scannable.
+- **Do** collapse "Advanced" settings by default.
+- **Do** hide health banners when everything is fine.
+- **Don't** stack every setting on one screen.
+- **Don't** use more than ~3 accent colors or more than 4 tabs.
+- **Don't** put destructive actions next to primary ones without a separator + confirmation.
+- **Don't** auto-expand every sequence/step — let the admin open what they need.
 
 ## Turning it on (hand-off)
 
