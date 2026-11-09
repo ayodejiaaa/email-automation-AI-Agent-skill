@@ -4,6 +4,11 @@
 > and user returns.** One sentence is all it takes, and it builds out an elaborate, clean Email
 > Automation section in your admin page, ready to go.
 
+> **Fork notice:** This is a fork of [davepartner/email-automation-AI-Agent-skill](https://github.com/davepartner/email-automation-AI-Agent-skill)
+> (MIT), taken at commit `25fe8ce`. It does not track upstream. The reference worker has been
+> hardened and the send window changed to 09:00–20:00 (quiet hours 20:00–09:00); see
+> [PATCHES.md](PATCHES.md).
+
 **Copy this prompt into your AI agent:**
 
 ```
