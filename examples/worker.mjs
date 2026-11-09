@@ -266,6 +266,7 @@ export class EmailWorker {
   constructor({
     store,
     sendEmail,
+    senders, // PATCH: { marketing, transactional } — one provider per kind (see below)
     isEligible, // PATCH: required. Defaulting to "always eligible" skipped stop conditions silently.
     now = () => Date.now(),
     maxPerDay = 1,
@@ -279,9 +280,16 @@ export class EmailWorker {
     if (typeof isEligible !== 'function') {
       throw new TypeError('EmailWorker requires an isEligible({ userId, stopCondition }) function');
     }
+    // PATCH: send through ONE function (sendEmail) or one per kind (senders). With `senders`
+    // there is no fallback between kinds: marketing never goes out through the transactional
+    // provider (e.g. ZeptoMail forbids promotional mail), and a missing sender defers the row.
+    if (typeof sendEmail !== 'function' && !senders) {
+      throw new TypeError('EmailWorker requires sendEmail, or senders: { marketing, transactional }');
+    }
     Object.assign(this, {
       store,
       sendEmail,
+      senders,
       isEligible,
       now,
       maxPerDay,
@@ -428,8 +436,16 @@ export class EmailWorker {
         continue;
       }
 
+      // PATCH: no provider for this kind (e.g. no marketing sender) → defer, then cancel. Never
+      // fall back to the other kind's provider.
+      const send = this.senderFor(row.kind);
+      if (!send) {
+        this.deferOrCancel(row, now, `no-sender:${row.kind}`, report);
+        continue;
+      }
+
       try {
-        await this.sendEmail({ userId: row.userId, stepId: row.stepId, kind: row.kind, channel, rowId: row.id });
+        await send({ userId: row.userId, stepId: row.stepId, kind: row.kind, channel, rowId: row.id });
         this.store.markSent(row.id, now);
         report.sent += 1;
       } catch (err) {
@@ -445,6 +461,12 @@ export class EmailWorker {
       }
     }
     return report;
+  }
+
+  /** PATCH: the send function for a kind; `senders` wins over the single `sendEmail`. */
+  senderFor(kind) {
+    if (this.senders) return typeof this.senders[kind] === 'function' ? this.senders[kind] : null;
+    return this.sendEmail;
   }
 
   deferOrCancel(row, now, reason, report) {

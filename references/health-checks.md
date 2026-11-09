@@ -12,7 +12,8 @@ Order of priority: **no transport → scheduler down → paused.**
 
 **Detect:** the app has no usable mail connection — no SMTP host/credentials and no provider API key
 (SendGrid, Mailgun, Postmark, SES, Resend). Check the app's mail config/env, not the automation tables
-(this system reuses the app's connection).
+(this system reuses the app's connection). Check **per kind**: warn if marketing sequences are enabled
+but no marketing-capable provider is set (transactional-only services such as ZeptoMail don't count).
 
 **Banner:**
 

@@ -23,8 +23,9 @@ sent_emails (audit: who, sequence, step, when, why, status)
 
 - **No mass blasts.** Each row is one email to one user.
 - **Cron/queue**, not request-time sends — never block a user request on email.
-- Reuse the app's existing mail transport (`Mail::to`, `send_mail`, provider SDK). Do not add a new
-  SMTP connection.
+- Reuse the app's existing mail transport (`Mail::to`, `send_mail`, provider SDK) for transactional.
+  Marketing uses a provider that permits it. Pass `senders: { marketing, transactional }` to the worker;
+  a kind with no sender is deferred, never sent via the other provider.
 
 ## Enrolment & scheduling
 

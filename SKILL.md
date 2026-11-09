@@ -41,7 +41,8 @@ anything that already works.
 ### 0. Discover (mandatory, before any code)
 Study the app thoroughly and produce a short **integration plan**. See `references/discovery.md`.
 - Detect the stack, framework, ORM/DB, auth, sessions, the **admin panel** (or note its absence).
-- Find the existing **email connection** (SMTP/provider SDK) — reuse it; never add a second one.
+- Find the existing **email connection** (SMTP/provider SDK) — reuse it. If it is transactional-only,
+  ask the admin for a separate marketing provider; don't route marketing through it.
 - Map **products**, **cart/checkout**, **orders**, **users**, and the events needed.
 - **Understand the platform's purpose and business model** (e-commerce, SaaS, fintech, booking, …), its
   activation event, and its critical account steps — then **propose extra reminder sequences** that fit
@@ -110,7 +111,9 @@ the ones the platform can detect and act on (`references/sequences.md`).
 
 1. **Study before building.** Never modify existing auth, cart, checkout, order, or user flows. Add
    new tables/routes only.
-2. **Reuse the existing email connection.** No second SMTP/provider setup. No mass/bulk sending —
+2. **Reuse the existing email connection — one per kind.** Transactional uses the app's connection;
+   marketing needs a provider that allows it (many transactional-only services, e.g. ZeptoMail, ban
+   promotional mail). Never send marketing through a transactional-only provider. No mass/bulk sending —
    emails are **per-user and event-driven**.
 3. **Ships paused.** Master switch OFF; admin is notified to turn it on (agent can offer to help).
 4. **No spam.** Frequency caps (default ≤1 marketing email/user/24h, ≤4/week), quiet hours, and a

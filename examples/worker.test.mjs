@@ -459,3 +459,58 @@ test('erasure removes channel consent, exclusions and step keys, but keeps the s
   store.eraseUser('u9', { keepSuppression: false });
   assert.equal(store.isSuppressed('gone@example.com'), false);
 });
+
+// ── Per-kind senders (e.g. ZeptoMail for transactional, another provider for marketing) ──
+function sendersSetup(senders, opts = {}) {
+  const store = new MemoryStore();
+  const worker = new EmailWorker({ store, senders, isEligible: () => true, now: () => 12 * HOUR, maxPerDay: 5, maxDeferrals: opts.maxDeferrals ?? 3 });
+  store.registerSequence('welcome', { kind: KIND.MARKETING, priority: PRIORITY.welcome });
+  store.registerSequence('verify', { kind: KIND.TRANSACTIONAL, priority: 9 });
+  addUser(store, 'u1', { email: 'u1@example.com' });
+  return { store, worker };
+}
+
+test('senders route each kind to its own provider', async () => {
+  const calls = [];
+  const { worker } = sendersSetup({
+    marketing: async (m) => { calls.push(['marketing', m.kind]); },
+    transactional: async (m) => { calls.push(['transactional', m.kind]); },
+  });
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'welcome', stepDefs: [{ id: 's1', delayMinutes: 0 }], at: 0 });
+  worker.enroll({ userId: 'u1', enrollmentId: 'e2', sequenceKey: 'verify', stepDefs: [{ id: 'v1', delayMinutes: 0 }], at: 0 });
+
+  const r = await worker.processDue();
+  assert.equal(r.sent, 2);
+  assert.deepEqual(calls.sort(), [['marketing', 'marketing'], ['transactional', 'transactional']]);
+});
+
+test('marketing never falls back to the transactional provider', async () => {
+  let transactionalCalls = 0;
+  const { store, worker } = sendersSetup({ transactional: async () => { transactionalCalls += 1; } }, { maxDeferrals: 1 });
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'welcome', stepDefs: [{ id: 's1', delayMinutes: 0 }], at: 0 });
+
+  const r1 = await worker.processDue();
+  assert.equal(r1.sent, 0);
+  assert.equal(r1.deferred, 1);
+  assert.equal(transactionalCalls, 0);
+
+  const row = [...store.rows.values()][0];
+  row.dueAt = 0; // make it due again
+  const r2 = await worker.processDue();
+  assert.equal(r2.cancelled, 1);
+  assert.equal(row.reason, 'max-deferrals:no-sender:marketing');
+  assert.equal(transactionalCalls, 0);
+});
+
+test('transactional mail still sends when no marketing provider is set', async () => {
+  const sent = [];
+  const { worker } = sendersSetup({ transactional: async (m) => { sent.push(m.kind); } });
+  worker.enroll({ userId: 'u1', enrollmentId: 'e1', sequenceKey: 'verify', stepDefs: [{ id: 'v1', delayMinutes: 0 }], at: 0 });
+
+  await worker.processDue();
+  assert.deepEqual(sent, ['transactional']);
+});
+
+test('the worker needs sendEmail or senders', () => {
+  assert.throws(() => new EmailWorker({ store: new MemoryStore(), isEligible: () => true }), /sendEmail, or senders/);
+});
