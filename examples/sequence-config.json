@@ -1,4 +1,10 @@
 {
+  "_conventions": {
+    "delay_direction": "delay_minutes is measured from ENROLMENT: due_at = enrolled_at + delay_minutes",
+    "kind": "marketing | transactional (transactional bypasses marketing unsubscribe)",
+    "priority": "lower number = higher precedence (purchase 1 … win-back 7); max 1 active marketing per user",
+    "templates": "each step 'copy' key resolves to a template in the 'templates' map (subject + body file)"
+  },
   "master_enabled": false,
   "settings": {
     "from_name": "Dave from NoteVault",
@@ -7,65 +13,56 @@
     "physical_address": "1 Example Street, Lagos, Nigeria",
     "max_per_day": 1,
     "max_per_week": 4,
-    "quiet_hours": { "start": "08:00", "end": "21:00" },
+    "send_window": { "start": "08:00", "end": "21:00" },
+    "fallback_timezone": "UTC",
     "attribution_window_days": 7
+  },
+  "templates": {
+    "welcome": { "subject": "welcome, {{first_name}}", "body": "templates/welcome.html" },
+    "cart-reminder": { "subject": "did you get distracted? your cart is still here", "body": "templates/cart-1h.html" },
+    "cart-social-proof": { "subject": "a few people asked about the {{product_name}}", "body": "templates/cart-24h.html" },
+    "cart-incentive": { "subject": "your cart expires soon", "body": "templates/cart-72h.html" },
+    "how-is-it": { "subject": "how's the {{product_name}} treating you?", "body": "templates/review-day1.html" },
+    "experience-upsell": { "subject": "two weeks in — how's it going?", "body": "templates/review-14d.html" },
+    "verify-account": { "subject": "please confirm your email", "body": "templates/verify.html" },
+    "complete-profile": { "subject": "one quick step to finish setting up", "body": "templates/profile.html" }
   },
   "sequences": [
     {
       "key": "welcome",
       "name": "Welcome / activate",
+      "kind": "marketing",
+      "priority": 4,
       "enabled": false,
       "default_discount_pct": 0,
       "trigger": { "event": "registration" },
       "stop": ["login", "purchase", "unsubscribe"],
       "steps": [
         { "position": 1, "delay_minutes": 0, "copy": "welcome", "discount_pct": 0 },
-        { "position": 2, "delay_minutes": 1440, "copy": "value", "discount_pct": 0 },
-        { "position": 3, "delay_minutes": 4320, "copy": "social-proof", "discount_pct": 0 }
-      ]
-    },
-    {
-      "key": "no_login",
-      "name": "Registered, never logged in",
-      "enabled": false,
-      "default_discount_pct": 0,
-      "trigger": { "event": "registration", "condition": "no_login" },
-      "stop": ["login", "unsubscribe"],
-      "steps": [
-        { "position": 1, "delay_minutes": 60, "copy": "youre-in" },
-        { "position": 2, "delay_minutes": 1440, "copy": "friction" },
-        { "position": 3, "delay_minutes": 4320, "copy": "last-nudge" }
-      ]
-    },
-    {
-      "key": "inactive_no_purchase",
-      "name": "Logged in, no purchase/use",
-      "enabled": false,
-      "default_discount_pct": 0,
-      "trigger": { "event": "login", "condition": "inactive_no_purchase" },
-      "stop": ["purchase", "activation", "unsubscribe"],
-      "steps": [
-        { "position": 1, "delay_minutes": 60, "copy": "reengage" },
-        { "position": 2, "delay_minutes": 1440, "copy": "value" },
-        { "position": 3, "delay_minutes": 7200, "copy": "last-checkin" }
+        { "position": 2, "delay_minutes": 1440, "copy": "welcome" },
+        { "position": 3, "delay_minutes": 4320, "copy": "welcome" }
       ]
     },
     {
       "key": "abandoned_cart",
       "name": "Abandoned cart / checkout / product",
+      "kind": "marketing",
+      "priority": 2,
       "enabled": false,
       "default_discount_pct": 0,
       "trigger": { "event": "checkout_start", "condition": "no_purchase" },
       "stop": ["purchase", "unsubscribe"],
       "steps": [
         { "position": 1, "delay_minutes": 60, "copy": "cart-reminder", "discount_pct": 0 },
-        { "position": 2, "delay_minutes": 1440, "copy": "social-proof", "discount_pct": 0 },
-        { "position": 3, "delay_minutes": 3600, "copy": "urgency-incentive", "discount_pct": 10, "expiry_hours": 48 }
+        { "position": 2, "delay_minutes": 1440, "copy": "cart-social-proof", "discount_pct": 0 },
+        { "position": 3, "delay_minutes": 3600, "copy": "cart-incentive", "discount_pct": 10, "expiry_hours": 48 }
       ]
     },
     {
       "key": "post_purchase_review",
       "name": "Post-purchase review / experience",
+      "kind": "marketing",
+      "priority": 1,
       "enabled": false,
       "default_discount_pct": 0,
       "trigger": { "event": "purchase" },
@@ -76,38 +73,47 @@
       ]
     },
     {
-      "key": "upsell",
-      "name": "Upsell / cross-sell",
-      "enabled": false,
-      "default_discount_pct": 0,
-      "trigger": { "event": "purchase", "condition": "other_products_exist" },
-      "stop": ["purchase_promoted_item", "unsubscribe"],
-      "steps": [
-        { "position": 1, "delay_minutes": 4320, "copy": "because-you-bought", "discount_pct": 0 }
-      ]
-    },
-    {
       "key": "win_back",
       "name": "Win-back / re-engagement",
+      "kind": "marketing",
+      "priority": 7,
       "enabled": false,
       "default_discount_pct": 0,
       "trigger": { "event": "inactivity", "days": 30 },
       "stop": ["activity", "unsubscribe"],
       "steps": [
-        { "position": 1, "delay_minutes": 0, "copy": "neutral-checkin" },
-        { "position": 2, "delay_minutes": 43200, "copy": "whats-new" },
-        { "position": 3, "delay_minutes": 43200, "copy": "final-we-stop" }
+        { "position": 1, "delay_minutes": 0, "copy": "welcome" },
+        { "position": 2, "delay_minutes": 43200, "copy": "welcome" },
+        { "position": 3, "delay_minutes": 43200, "copy": "welcome" }
       ]
     },
     {
-      "key": "replenishment",
-      "name": "Replenishment (consumables)",
+      "key": "verify_account",
+      "name": "Email verification",
+      "kind": "transactional",
+      "priority": 9,
       "enabled": false,
       "default_discount_pct": 0,
-      "trigger": { "event": "purchase", "condition": "consumable" },
-      "stop": ["repurchase", "unsubscribe"],
+      "trigger": { "event": "registration", "condition": "email_unverified" },
+      "stop": ["verified"],
       "steps": [
-        { "position": 1, "delay_minutes": 64800, "copy": "running-low", "discount_pct": 0 }
+        { "position": 1, "delay_minutes": 60, "copy": "verify-account" },
+        { "position": 2, "delay_minutes": 1440, "copy": "verify-account" },
+        { "position": 3, "delay_minutes": 4320, "copy": "verify-account" }
+      ]
+    },
+    {
+      "key": "complete_profile",
+      "name": "Profile completion",
+      "kind": "transactional",
+      "priority": 9,
+      "enabled": false,
+      "default_discount_pct": 0,
+      "trigger": { "event": "login", "condition": "profile_incomplete" },
+      "stop": ["profile_complete"],
+      "steps": [
+        { "position": 1, "delay_minutes": 60, "copy": "complete-profile" },
+        { "position": 2, "delay_minutes": 1440, "copy": "complete-profile" }
       ]
     }
   ]

@@ -141,7 +141,12 @@ most one promotional sequence, highest priority wins (lower number = higher prio
 | 7 | Win-back | — |
 
 When higher priority enrols, cancel conflicting lower-priority scheduled rows. Never run two
-promotional sequences the same day (also enforced by frequency caps).
+promotional sequences the same day (also enforced by frequency caps). **Enforce at most 1 active
+marketing sequence per user** — implemented and tested in `examples/worker.mjs`.
+
+**Kind:** tag every sequence `marketing` or `transactional`. Transactional/account reminders
+(verification, KYC, billing, 2FA, policy) **bypass marketing unsubscribe** but still avoid
+hard-bounced addresses (see `sending-and-compliance.md`).
 
 ## Discount guardrails
 

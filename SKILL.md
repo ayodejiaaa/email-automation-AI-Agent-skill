@@ -26,6 +26,8 @@ anything that already works.
 
 ---
 
+**Fast path:** `references/quickstart.md` (one page). **Depth:** the references below.
+
 ## The workflow
 
 ```
@@ -119,10 +121,16 @@ the ones the platform can detect and act on (`references/sequences.md`).
    scheduled email is visible in the admin.
 9. **Beauty + seamlessness.** Match the app's design tokens; the admin section must look native. Use
    the `reviews-to-features`-style rigor: clear hierarchy, 44px targets, accessible contrast.
-10. **Free WYSIWYG editor for email bodies.** The admin edits each email template in a **free,
-    self-hosted WYSIWYG editor** (TinyMCE Community; or Quill / TipTap / Summernote / GrapesJS).
-    Output must be **email-safe** (inline CSS, tables, ~600px, no JS), sanitized, with merge tokens,
-    a conditional-discount block, and an auto-generated plain-text twin.
+10. **Template editor: reuse before adding.** If the app already has a WYSIWYG editor, **reuse it**
+    (configured for email). Otherwise add a **free, self-hosted** one (TinyMCE Community / Quill /
+    TipTap / Summernote / GrapesJS). Output must be **email-safe** (inline CSS, tables, ~600px, no JS),
+    sanitized, with merge tokens, a conditional-discount block, and a plain-text twin. See
+    `references/wysiwyg.md`.
+11. **Transactional ≠ marketing; one active marketing sequence.** Tag each sequence `kind`
+    (`marketing` | `transactional`); marketing respects consent/suppress/holdout, while transactional
+    (verification/KYC/billing) bypasses them. Enforce **≤1 active marketing sequence per user**, plus
+    consent, holdout, exclusions, quiet hours in the user's timezone, retry caps and max deferrals —
+    implemented and tested in `examples/worker.mjs` + `worker.test.mjs`.
 
 ---
 
@@ -148,8 +156,8 @@ the ones the platform can detect and act on (`references/sequences.md`).
   paused**. See `references/health-checks.md`.
 - **Email Automation** menu (top-level), with tabs:
   - **Sequences** — per-sequence **Start / Pause / Delete** (delete is confirmed + soft-deleted/
-    restorable, tucked into `⋯`), delays, discounts, stop conditions, a **free WYSIWYG editor**, and
-    **add / reorder / delete steps**.
+    restorable, tucked into `⋯`), delays, discounts, stop conditions, a **WYSIWYG editor (reuse the
+    app's existing one if present)**, and **add / reorder / delete steps**.
   - **Users & recipients** — search a user by email; expand their **sequence of emails** with the down
     caret; **cancel a specific email** or **exclude the user completely**; plus the full sent log
     **paginated by 100** with *when* and *why*.
@@ -204,6 +212,10 @@ Full UI spec: `references/admin-ui.md`.
 - `references/admin-ui.md` — the dashboard, users tab (search/cancel/exclude), log (100/page), stats,
   admin-only tables, WYSIWYG, add/edit steps.
 - `references/health-checks.md` — pause / cron-not-running / no-transport warnings with fix guidance.
+- `references/wysiwyg.md` — reuse an existing editor, else add one; email-safe pipeline.
+- `references/quickstart.md` — the one-page path.
+- `examples/render.mjs` + `render.test.mjs` — Mustache email renderer + 0%-discount test.
+- Run the tests with `npm install && npm test` (worker + renderer).
 - `references/reference-implementation.md` — the engine in pseudocode + SQL (locking, reaper, attribution).
 - `examples/worker.mjs` + `examples/worker.test.mjs` — executable, tested scheduler/worker core.
 - `examples/data-model.md` — DB schema.

@@ -104,6 +104,32 @@ not as the strategy.
 - **Transactional vs marketing:** order/receipt emails are transactional; everything in this system is
   **marketing** and therefore needs consent + unsubscribe. Keep the line clear.
 
+## Transactional vs marketing (enforced)
+
+- **Marketing** (welcome, cart, upsell, win-back, browse, review, replenishment): requires
+  `consent_marketing`, respects `email_suppressions` (unsubscribe/bounce/complaint), and the holdout
+  group.
+- **Transactional / account** (email verification, KYC, billing/trial, security/2FA, policy re-consent):
+  part of delivering the service. They **bypass marketing consent/unsubscribe** but still avoid
+  hard-bounced/complained addresses. **Never let a marketing unsubscribe stop "verify your email".**
+- Tag each sequence with `kind` (`marketing` | `transactional`); the worker checks it
+  (`examples/worker.mjs`, tested).
+
+## Provider throughput, tenancy & i18n
+
+- **Provider rate limits:** respect the ESP's caps (SendGrid/SES/Mailgun have per-second limits).
+  Batch + throttle; handle `429` with backoff.
+- **Multi-tenancy:** scope every table by `tenant_id` and never let one tenant see another's emails or
+  people. The admin UI + queries must filter by tenant.
+- **i18n:** store per-locale subject/body (or translate at render). Use the user's locale; fall back to
+  the default. Don't send English to a Spanish user if Spanish is supported.
+
+## Max active sequences
+
+- Enforce **at most 1 active marketing sequence per user** (highest priority wins; lower-priority
+  scheduled rows are cancelled on enrolment). This guard keeps many enabled sequences from turning into
+  spam. Implemented in `examples/worker.mjs`.
+
 ## The pause-by-default contract
 
 - On install, **everything is paused** (master switch OFF, no sequence active).

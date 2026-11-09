@@ -96,25 +96,32 @@ nothing breaks and nothing sends until you say so.
 ```
 SKILL.md                              # the skill: workflow, sequences, non-negotiables
 references/
+├── quickstart.md                     # the one-page path
 ├── discovery.md                      # study the app, find admin, choose integration path
 ├── non-disruption.md                 # enforced contract: backup, reversible migrations, smoke test
 ├── triggers.md                       # exact detection rules (cart-abandon, inactivity, etc.)
 ├── sequences.md                      # catalog: precedence, timing, copy intent, stop conditions
 ├── email-copy.md                     # personal copy standards, subject lines, templates
-├── sending-and-compliance.md         # cron, idempotency, caps, deliverability pre-flight
+├── wysiwyg.md                        # reuse an existing editor; email-safe pipeline
+├── sending-and-compliance.md         # cron, caps, transactional vs marketing, rate limits, i18n
 ├── compliance.md                     # consent, signed unsubscribe, preference center, webhooks
 ├── admin-ui.md                       # dashboard, log (100/page), stats chart, admin tables, WYSIWYG
+├── health-checks.md                  # paused / cron / transport warnings
 └── reference-implementation.md       # engine pseudocode + SQL (locking, reaper, attribution)
 examples/
 ├── worker.mjs                        # executable scheduler/worker core
-├── worker.test.mjs                   # tests: idempotency, stop-conditions, caps, reaper
+├── worker.test.mjs                   # tests: idempotency, consent, holdout, precedence, exclusions…
+├── render.mjs                        # Mustache email renderer (0%-discount conditional)
+├── render.test.mjs                   # tests the 0%-discount rule
 ├── data-model.md                     # additive DB schema
 ├── sequence-config.json              # concrete, editable config
 └── email-templates.md                # sample rendered emails
+.github/workflows/test.yml            # CI: npm install && npm test
 package.json                          # `npm test`
 ```
 
-Run the reference engine's tests with `npm test` (or `node --test examples/*.test.mjs`).
+Run the tests with `npm install && npm test` (or `node --test examples/*.test.mjs`). CI runs them on
+every push.
 
 ---
 
@@ -163,6 +170,8 @@ SKILL.md, and build the Email Automation section into this app:
   lift as directional until you have data.
 - **Deliverability is earned** — new domains need warm-up; the skill is only as good as sender reputation.
 - **Timezone/quiet-hours** need a stored user timezone; unknown timezones fall back to the admin window.
+- **The reference worker is in-memory** — the tests cover decision logic, not real `SKIP LOCKED` DB
+  concurrency; add a Postgres integration test before production.
 
 ---
 
@@ -196,7 +205,10 @@ test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
 
-Pause sequence, start sequence, delete sequence, soft delete, restore sequence, clean admin UI,
+Transactional email, marketing email, transactional vs marketing, consent, holdout group, sequence
+precedence, max active sequence, quiet hours timezone, max deferral, unsubscribe token, mustache,
+email render test, CI, pause sequence, start sequence, delete sequence, soft delete, restore sequence,
+clean admin UI,
 uncluttered admin, information architecture, progressive disclosure, admin design, add email step, edit
 sequence, cancel scheduled email, exclude user, user search, email automation
 health, cron not running, scheduler heartbeat, SMTP not configured, email transport missing, send test

@@ -5,8 +5,9 @@ All tables are **new** — no existing table is altered. Names are illustrative;
 ```
 email_sequences
   id, key, name, enabled(bool), description,
+  kind(varchar, default 'marketing'),           -- marketing | transactional
   default_discount_pct(int, default 0),
-  priority(int), holdout_pct(int, default 0),   -- % of eligible users withheld (measure lift)
+  priority(int), holdout_pct(int, default 0),   -- lower priority = higher precedence
   created_at, updated_at
 
 email_sequence_steps
@@ -32,7 +33,8 @@ email_scheduled
   id, enrollment_id FK, step_id FK, user_id FK,
   due_at(timestamp),
   status(scheduled | sending | sent | cancelled | failed),
-  locked_at, attempts(int), error(text),
+  locked_at, attempts(int), deferrals(int, default 0), error(text),
+  kind(varchar), priority(int), group(treatment | holdout),
   UNIQUE(enrollment_id, step_id)      -- idempotency: never double-schedule
 
 email_sent                                   -- immutable audit log
@@ -86,6 +88,16 @@ admin_audit
 - **`group = holdout`** users receive no marketing emails; they are the control for honest lift.
 - **`trigger_ref`** (e.g. cart id, date bucket) makes enrolment idempotent across polling runs.
 - **`ab_variant`** on steps enables subject/body A/B; `email_sent.ab_variant` records which was sent.
+
+## Conventions
+
+- **`delay_minutes` is measured from ENROLMENT**, not from the previous step:
+  `due_at = enrolled_at + step.delay_minutes` (step 3 at 3600 = 60h after enrolment).
+- **`kind`** — `marketing` | `transactional` (transactional bypasses marketing unsubscribe).
+- **`priority`** — lower number = higher precedence (purchase 1 … win-back 7); max 1 active marketing.
+- **`group`** — `treatment` | `holdout` (holdout receives no marketing email).
+- **`copy` keys** in `sequence-config.json` map to `templates` (subject/body) defined in the DB or
+  `examples/email-templates.md`.
 
 ## Retention & privacy
 

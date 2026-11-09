@@ -92,26 +92,17 @@ the free WYSIWYG, stop condition), **Add step** (see below), preview + test-send
 - A new step does **not** re-email users who already passed that point unless the admin explicitly
   opts in.
 
-### Email body editor (free WYSIWYG — required)
+### Email body editor (WYSIWYG — reuse what exists first)
 
-The body of every step is edited with a **free, self-hosted WYSIWYG editor** — never a paid,
-cloud-only one.
+**Before adding an editor, check whether the app already has one** (TinyMCE/CKEditor/Quill/Summernote/
+TipTap, or the framework's admin editor). **If it does, reuse it** — configure it for email-safe
+output. Only if none exists, add a **free, self-hosted** editor (TinyMCE Community, Quill, TipTap,
+Summernote, or GrapesJS + MJML). Never a paid cloud-only editor.
 
-- **Primary:** **TinyMCE Community (self-hosted)** — familiar, mature, MIT-licensed, easy to embed.
-- **Lightweight alternatives:** **Quill**, **TipTap**, **Summernote** (all free / open-source).
-- **Drag-and-drop email builder (optional):** **GrapesJS** with the newsletter/email preset (pairs
-  with **MJML** for responsive output).
-- **Email-safe output is mandatory.** The editor must produce HTML that survives email clients:
-  table-based layout, **inline CSS**, ~600px width, alt text on images, **no `<script>`**, no external
-  stylesheets/JS, no forms. Web-only HTML breaks in Outlook/Gmail.
-- **Merge tokens:** a toolbar button inserts `{{first_name}}`, `{{product_name}}`, `{{cart_link}}`,
-  `{{discount}}`, `{{support_link}}`, `{{unsubscribe_link}}`, etc., with safe fallbacks.
-- **Conditional blocks:** the discount sentence is a conditional block that renders only when
-  discount > 0 (so a 0% email shows no discount text).
-- **Sanitize on save** with a tag/attribute allowlist (prevents XSS in the admin and in the inbox).
-- **Plain-text twin:** auto-generate a plain-text version (≥500 chars) from the HTML; store both.
-- **Preview** (desktop / mobile / dark mode) + **test-send** to the admin's own inbox.
-- **Lazy-load** the editor only on the template-edit page so the rest of the admin stays fast.
+Whatever the editor, run its output through an **email-safe pipeline**: sanitize (allowlist) → transform
+to email-safe HTML (tables, inline CSS, ~600px, no JS) → wrap in a base template → store HTML +
+plain-text. Merge tokens + a conditional `{{#discount_active}}` block. **Full detail:**
+`references/wysiwyg.md`.
 
 ## Tab 2 — Users & recipients
 

@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Reference implementation for the email-automation skill (scheduler/worker core).",
+  "description": "Reference implementation for the email-automation skill (worker + email renderer).",
   "scripts": {
     "test": "node --test examples/*.test.mjs"
+  },
+  "devDependencies": {
+    "mustache": "^4.2.0"
   }
 }

@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0] — 2026-11-09
+
+### Hardening (review items 2–10)
+- **Worker now enforces** consent, holdout group, sequence precedence (max 1 active marketing), admin
+  per-step exclusions, timezone-aware quiet hours, frequency caps, retry caps and max deferrals, and
+  **transactional vs marketing** separation. Tests added for each (`worker.test.mjs`, 14 tests).
+- **Signed unsubscribe tokens** (HMAC) with verify + tamper tests; **erasure** helper.
+- **Discount conditional tested** with a real template engine (Mustache): `examples/render.mjs` +
+  `render.test.mjs` assert a 0% discount renders **no** discount text.
+- **CI** (`.github/workflows/test.yml`) runs `npm install && npm test` on every push.
+- **WYSIWYG**: reuse the app's existing editor if it has one; else a free one. Email-safe pipeline
+  (sanitize → transform → base template) documented in `references/wysiwyg.md`.
+- **Provider rate limits, multi-tenancy, i18n** guidance + **max active sequences** guard.
+- **Quickstart** (`references/quickstart.md`) + fixed ambiguities (delay = from enrolment; `kind`;
+  config `templates` map; transactional vs marketing).
+
 ## [Unreleased]
 
 ### Platform scouting & derived sequences
