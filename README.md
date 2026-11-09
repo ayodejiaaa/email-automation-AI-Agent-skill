@@ -17,6 +17,9 @@ until you say so.
 |-------|---------------------|
 | **Sequences** | 8 lifecycle sequences, each on/off, with editable delays, discounts, and copy |
 | **Template editor** | a **free, self-hosted WYSIWYG editor** (TinyMCE Community; or Quill/TipTap/Summernote/GrapesJS) to edit each email body — email-safe HTML, merge tokens, preview + test-send |
+| **Editable sequences** | admin can **add / reorder / delete steps**; a new step also schedules for active enrolments |
+| **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |
+| **User controls** | search a user by email, expand their sequence with a caret, **cancel one specific email** or **exclude the user** from all automation |
 | **Recipients log** | every user + emails sent/scheduled, **paginated by 100**, with *when* and *why* |
 | **Statistics** | of those who got reminders, how many converted + revenue, charted by day/week/month |
 | **Settings** | sender (from-name/email, reply-to, address), master pause, caps, quiet hours |
@@ -175,7 +178,10 @@ test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
 
-Non-disruptive, reversible migration, migration rollback, feature flag, kill switch, event observer,
+Add email step, edit sequence, cancel scheduled email, exclude user, user search, email automation
+health, cron not running, scheduler heartbeat, SMTP not configured, email transport missing, send test
+email, pause warning, admin user management, per-email cancellation, resend control, non-disruptive,
+reversible migration, migration rollback, feature flag, kill switch, event observer,
 conversion attribution, holdout group, last-touch attribution, A/B subject testing, browse abandonment,
 back in stock, price drop, dunning, referral email, preference center, consent, double opt-in, signed
 unsubscribe token, one-click unsubscribe, bounce webhook, complaint webhook, retention policy,

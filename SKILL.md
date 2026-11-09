@@ -133,19 +133,24 @@ referral. See `references/sequences.md`.
 
 ## Admin surface (what the admin gets)
 
+- **Health banners** at the top of every tab: **no email transport configured**, **scheduler/cron not
+  running** (with a detailed why + how-to-fix), and **automation paused**. See
+  `references/health-checks.md`.
 - **Email Automation** menu (top-level), with tabs:
-  - **Sequences** — per-sequence on/off, delays, discounts, stop conditions, and a **free WYSIWYG
-    editor** for the email body (email-safe output, merge tokens, preview + test-send).
-  - **Recipients** — table of users + emails sent/scheduled, **paginated by 100**, with *when* and
-    *why* (sequence + step + trigger).
-  - **Statistics** — of users who received a reminder, how many converted, revenue, and a chart by
+  - **Sequences** — per-sequence on/off, delays, discounts, stop conditions, a **free WYSIWYG editor**,
+    and **add / reorder / delete steps** (a new step also schedules for active enrolments).
+  - **Users & recipients** — search a user by email; expand their **sequence of emails** with the down
+    caret; **cancel a specific email** or **exclude the user completely**; plus the full sent log
+    **paginated by 100** with *when* and *why*.
+  - **Statistics** — of users who received a reminder, how many converted, revenue, chart by
     **day / week / month**.
   - **Settings** — sender (from-name/from-email/reply-to/physical address), master pause, caps,
     quiet hours.
 - **Admin-only tables** at the bottom of **product** and **checkout** pages:
-  - Tab **Purchased** and tab **Abandoned** — clearly marked *"Admin only"*.
-  - Columns: email (→ user profile), registration/login/abandon datetimes, would-have-paid amount,
-    phone (→ `tel:` call), and a caret revealing **emails received + scheduled + when**.
+  - Tabs **Purchased** / **Abandoned** — clearly marked *"Admin only"*.
+  - Columns: email (→ user panel), registration/login/abandon datetimes, would-have-paid amount,
+    phone (→ `tel:` call), and a caret revealing **emails received + scheduled** that links to the user
+    panel to cancel/exclude.
   - Disable-able from Email Automation → Settings, with instructions under the table title + link.
 
 Full UI spec: `references/admin-ui.md`.
@@ -165,8 +170,9 @@ Full UI spec: `references/admin-ui.md`.
 1. `references/discovery.md` → an **integration plan** for the specific app.
 2. New tables/migrations + the scheduler + send worker (additive).
 3. The event hooks (observe-only).
-4. The admin "Email Automation" page + tabs + statistics chart, including a **free WYSIWYG editor**
-   for the email body (email-safe output, merge tokens, preview + test-send).
+4. The admin "Email Automation" page + tabs + statistics chart, including a **free WYSIWYG editor**,
+   **add / reorder / delete steps**, a **user search + per-email cancel / exclude**, and **health
+   warnings** (paused, cron not running, no mail transport).
 5. The admin-only purchased/abandoned tables.
 6. A preview/test-send tool + dry-run + rollback notes.
 7. A short **hand-off doc**: what was added, how to turn it on, how to pause, how to roll back.
@@ -183,7 +189,9 @@ Full UI spec: `references/admin-ui.md`.
 - `references/email-copy.md` — personal "from one person" copy standards, subject lines, templates.
 - `references/sending-and-compliance.md` — scheduler, idempotency, caps, deliverability pre-flight.
 - `references/compliance.md` — consent, signed unsubscribe, preference center, bounce/complaint webhooks.
-- `references/admin-ui.md` — the dashboard, log (100/page), statistics chart, admin-only tables, WYSIWYG.
+- `references/admin-ui.md` — the dashboard, users tab (search/cancel/exclude), log (100/page), stats,
+  admin-only tables, WYSIWYG, add/edit steps.
+- `references/health-checks.md` — pause / cron-not-running / no-transport warnings with fix guidance.
 - `references/reference-implementation.md` — the engine in pseudocode + SQL (locking, reaper, attribution).
 - `examples/worker.mjs` + `examples/worker.test.mjs` — executable, tested scheduler/worker core.
 - `examples/data-model.md` — DB schema.

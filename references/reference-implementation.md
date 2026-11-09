@@ -69,6 +69,10 @@ Then, per row, in the worker (see `worker.mjs`):
 3. **Send** through the app's existing mail transport.
 4. **Mark sent** + insert the immutable `email_sent` audit row (with `trigger_reason`).
 
+Also: write `email_settings.last_cron_run_at = now()` at the start of every run (this powers the
+**cron-health banner**), and skip any row whose `(user_id, step_id)` is in `email_step_exclusions`
+(the admin's per-email exclusion).
+
 ## 4. Crash recovery (reaper)
 
 ```sql

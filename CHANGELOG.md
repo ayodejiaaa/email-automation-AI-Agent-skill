@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Admin controls & health
+- **Add / reorder / delete sequence steps** from the admin (new steps also schedule for active enrolments).
+- **Users tab** — search a user by email, expand their sequence with the down caret, **cancel a
+  specific email**, or **exclude the user** from all automation (with audit + re-include).
+- **Health banners** — warn when **automation is paused**, the **cron/scheduler isn't running** (with a
+  detailed why + stack-specific fix commands + "Test now"), or there's **no SMTP/API key** (with setup
+  steps + "Send test email"). Added `references/health-checks.md`.
+- Data model: `email_step_exclusions`, `email_settings.last_cron_run_at`.
+
+
 ### Hardening (from the review)
 - **Executable, tested engine** — `examples/worker.mjs` + `worker.test.mjs` (idempotency,
   stop-conditions, frequency caps, crash-recovery reaper) and `references/reference-implementation.md`

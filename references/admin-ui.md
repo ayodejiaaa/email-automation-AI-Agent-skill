@@ -10,7 +10,27 @@ hierarchy, ≤5 top-level tabs, 44px targets, 4.5:1 contrast, empty/loading/erro
 
 Add one top-level menu item: **"Email Automation"** (mail icon), placed near other management items.
 
-Tabs: **Sequences · Recipients · Statistics · Settings**.
+Tabs: **Sequences · Users & recipients · Statistics · Settings**.
+
+---
+
+## Health & warnings (shown at the top of every tab)
+
+Surface **prominent banners** when email can't go out. Full detection + fix guidance:
+`references/health-checks.md`.
+
+1. **No email transport configured (critical).** No SMTP/API key → "No email sending is configured —
+   emails can't be delivered." Explain how to configure it (the app's mail settings) + a **Send test
+   email** button.
+2. **Scheduler / cron not running (critical).** The scheduler writes `last_cron_run_at` each run; if
+   it's older than ~10 minutes, warn: "The email scheduler hasn't run in {duration} — emails are
+   queued but not sending." Expand for **why** (cron not installed, queue worker down, wrong clock,
+   crash) and **how to fix** (the exact cron/queue command for this stack).
+3. **Automation paused (warning).** Master switch is off → "Email Automation is paused — no emails are
+   being sent." + [Turn on].
+
+Order: transport → scheduler → paused. Each banner: reason, expandable "how to fix", action buttons.
+Re-check on load + every 60s + a manual "Re-check".
 
 ---
 
@@ -23,6 +43,17 @@ Tabs: **Sequences · Recipients · Statistics · Settings**.
 - Edit drawer/page: step list with **delay**, **discount %** (0 = hidden in email), **subject + body**
   (edited with a **free WYSIWYG editor** — see below), **stop conditions**, and **on/off**.
 - **Preview & test-send** to the admin's own email before enabling.
+
+### Add / edit steps (admin can extend a sequence)
+
+- **"Add step"** appends a new step: delay, subject, body (WYSIWYG), discount % (0 = no mention),
+  stop condition, on/off.
+- Adding a step to a **live** sequence also schedules it for active enrolments
+  (`due_at = enrolled_at + delay`; idempotent on `(enrollment_id, step_id)`).
+- **Reorder** keeps delays monotonic (validate); **delete a step** cancels its scheduled emails
+  (confirm first).
+- A new step does **not** re-email users who already passed that point unless the admin explicitly
+  opts in.
 
 ### Email body editor (free WYSIWYG — required)
 
@@ -45,23 +76,41 @@ cloud-only one.
 - **Preview** (desktop / mobile / dark mode) + **test-send** to the admin's own inbox.
 - **Lazy-load** the editor only on the template-edit page so the rest of the admin stays fast.
 
-## Tab 2 — Recipients (the log)
+## Tab 2 — Users & recipients
 
-The audit trail. **Paginated by 100.**
+Two jobs: **find a user and control what they receive**, and **audit the log**.
 
-Columns:
+### Find a user & control their emails
+
+- **Search box:** "Find a user by email" → results → open the **user panel**.
+- **User panel:** email (→ profile), phone, registration/login dates, consent, holdout flag.
+- **Their emails, grouped by sequence** — each step with status (`sent` · `scheduled` · `cancelled` ·
+  `failed`) and its date. A **down caret** on each sequence expands the full ordered list of emails
+  going out.
+- **Cancel one email:** a "Cancel" action on any **scheduled** step → `email_scheduled.status =
+  'cancelled'` (confirm). Also record a per-step exclusion (`email_step_exclusions`) so it isn't
+  re-scheduled.
+- **Exclude the user completely:** a prominent "Exclude from all automation" action → adds to
+  `email_suppressions` (reason `admin`) and cancels all their scheduled rows. Offer **Re-include**
+  (re-consent if they unsubscribed themselves).
+- Every change is written to `admin_audit`.
+
+### The audit log
+
+The full sent log, **paginated by 100**:
 
 | Column | Notes |
 |--------|-------|
-| User | email — **clickable → user profile** |
+| User | email — **clickable → user profile / user panel** |
 | Sequence / step | e.g. "Abandoned cart · Step 2" |
 | Status | sent · scheduled · cancelled · failed |
 | When | sent_at or scheduled due_at (user-local time) |
-| Why | the triggering event + stop-condition reason ("cart abandoned 24h ago") |
+| Why | the triggering event + stop/cancel reason |
 
-- Filters: sequence, status, date range, search by email.
-- A **scheduled** row shows its future `due_at`; a cancelled row shows *why*.
+- Filters: sequence, status, date range, email search.
+- A cancelled row shows *why* (stop condition, admin cancel, exclusion).
 - Empty state: "No emails yet — turn on a sequence to start."
+- The **caret in the product/checkout admin tables** links here to manage the same user.
 
 ## Tab 3 — Statistics (conversion attribution)
 
@@ -108,7 +157,7 @@ Columns:
 | Abandoned | datetime (abandoned tab) |
 | Would have paid | amount + currency |
 | Phone | **clickable → `tel:` call** (if present) |
-| Emails ▾ | caret expands a list of **emails received + scheduled** (what + when) |
+| Emails ▾ | caret expands **emails received + scheduled** (what + when) and links to the user panel to cancel one or exclude the user |
 
 - The caret opens a small timeline: sent (with date) and scheduled (with due date).
 - Respect privacy: only aggregate the data the admin already has access to.

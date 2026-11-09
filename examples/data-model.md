@@ -52,12 +52,17 @@ email_settings
   send_window_start, send_window_end,          -- passed to isWithinAllowedSendWindow
   fallback_timezone(varchar, default 'UTC'),   -- when a user has no timezone
   attribution_window_days(int, default 7),
-  show_admin_tables(bool, default true)
+  show_admin_tables(bool, default true),
+  last_cron_run_at(timestamp, nullable)        -- heartbeat for the cron health check
 
 email_suppressions
   id, email (unique), reason(unsubscribed | hard_bounce | complaint | admin),
   sequence_key(varchar, nullable),    -- null = all sequences
   created_at
+
+email_step_exclusions                       -- admin excluded a user from ONE specific email
+  id, user_id FK, step_id FK, reason(varchar), created_at,
+  UNIQUE(user_id, step_id)
 
 email_consent
   id, user_id FK, marketing bool, consent_at, consent_ip, source, updated_at
