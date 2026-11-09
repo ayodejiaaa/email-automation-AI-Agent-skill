@@ -1,0 +1,10 @@
+{
+  "name": "email-automation-skill",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference implementation for the email-automation skill (scheduler/worker core).",
+  "scripts": {
+    "test": "node --test examples/*.test.mjs"
+  }
+}

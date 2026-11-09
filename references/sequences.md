@@ -125,6 +125,54 @@ protects sender reputation (don't keep emailing the unresponsive).
 - Generate a **unique, expiring code** per user when possible; log redemption.
 - Never stack multiple discounts in one send.
 
+## Sequence precedence (who wins)
+
+A user can qualify for several sequences at once. Resolve with a **priority matrix** — a user is in at
+most one promotional sequence, highest priority wins (lower number = higher priority):
+
+| Priority | Sequence | Wins over |
+|----------|----------|-----------|
+| 1 | Post-purchase review / upsell | everything (purchase path) |
+| 2 | Abandoned cart / checkout | browse, welcome, win-back |
+| 3 | Browse-abandon | welcome, win-back |
+| 4 | Welcome / activate | no-login, inactive |
+| 5 | No-login | inactive |
+| 6 | Inactive / re-engage | win-back |
+| 7 | Win-back | — |
+
+When higher priority enrols, cancel conflicting lower-priority scheduled rows. Never run two
+promotional sequences the same day (also enforced by frequency caps).
+
+## Discount guardrails
+
+- **Min-cart guard:** if `cart.total < min_cart_total` (e.g. < $20), **omit the discount** — a 10% off
+  a $15 cart costs more margin than it recovers.
+- **First touch = no discount**; incentives live in later steps only.
+- Time-box every discount and **log redemption**; never stack.
+
+## A/B subject testing
+
+- Each step may carry `ab_variant` A/B; split eligible users 50/50 (deterministic by user id hash).
+- Track open/convert per variant; promote the winner after significance. Never A/B a transactional
+  message.
+
+## More world-standard sequences (config-gated)
+
+| Sequence | Trigger | Timing | Notes |
+|----------|---------|--------|-------|
+| **Browse-abandon** | Product viewed, no cart/purchase | 1h → 24h | Show the viewed product; no discount on step 1 |
+| **Back-in-stock** | Product back in stock + user viewed/notified | immediate | Only to users who opted in / viewed |
+| **Price-drop** | Price drops on a viewed item | immediate | Honest, real price change only |
+| **Dunning / failed payment** | Subscription renewal failed | day 0 → 3 → 7 | *Transactional-leaning*: recover the payment; include a clear fix link |
+| **Referral ask** | Positive review / high NPS | ~3 days after review | One ask, then stop |
+| **Replenishment** | Consumable purchase | ~day 45–60 | Reorder link |
+
+## Implementation reference
+
+The scheduling/worker logic (idempotency, stop-conditions, frequency caps, reaper) is implemented and
+tested in `examples/worker.mjs` (+ `worker.test.mjs`). Precedence is enforced by cancelling
+lower-priority scheduled rows when a higher-priority sequence enrols.
+
 ## World-standard additions included
 
 - **Welcome series** (registration) — highest-ROI lifecycle email.

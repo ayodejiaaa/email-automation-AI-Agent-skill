@@ -1,17 +1,13 @@
 ---
 name: email-automation
 description: >-
-  Build a complete, non-disruptive "Email Automation" section inside an app's admin panel that turns
-  user behaviour into lifecycle email reminders — welcome, re-engagement, abandoned cart/checkout,
-  post-purchase review, upsell/cross-sell, win-back, and replenishment — using proven funnel timing,
-  personal one-to-one copy, discounts/urgency, and cron-based sending through the app's existing email
-  connection. Ships an admin dashboard (sequences, recipient log paginated by 100, conversion
-  statistics chart, sender + pause settings) and admin-only purchased/abandoned tables on product and
-  checkout pages. Everything starts PAUSED and non-disruptive. Use when adding email automation,
-  drip/lifecycle email, abandoned-cart recovery, reminder emails, or an "Email Automation" admin menu.
-  Triggers: "email automation", "drip campaign", "abandoned cart emails", "reminder emails",
-  "lifecycle emails", "welcome sequence", "win-back emails", "upsell emails", "email reminders in my
-  admin", "build an email automation section".
+  Build a non-disruptive "Email Automation" section inside an app's admin panel: lifecycle reminders
+  (welcome, abandoned cart, post-purchase, upsell, win-back) with proven funnel timing, personal copy,
+  a free WYSIWYG editor, conversion stats, and admin-only tables. Ships paused and reuses the app's
+  email connection. Use for email automation, drip/lifecycle email, abandoned-cart recovery, or an
+  "Email Automation" admin menu. Triggers: "email automation", "drip campaign", "abandoned cart
+  emails", "reminder emails", "lifecycle emails", "welcome sequence", "win-back emails", "upsell
+  emails".
 ---
 
 # Email Automation — Admin Section Builder
@@ -88,7 +84,12 @@ Full detail, copy intent, and stop conditions: `references/sequences.md`. Summar
 | 8 | **Replenishment** | Consumable product | ~Day 45–60 | Repurchase |
 
 **Discounts:** upsells may carry a discount; abandoned carts carry **urgency + discount**. Default
-**0%** — when 0, the email must **not mention a discount at all**. (`references/sequences.md`.)
+**0%** — when 0, the email must **not mention a discount at all**. A **min-cart guard** skips the
+incentive on very low-value carts. (`references/sequences.md`.)
+
+**Precedence:** a user is in at most one promotional sequence — purchase > cart > browse > welcome >
+no-login > inactive > win-back. Extra sequences: browse-abandon, back-in-stock, price-drop, dunning,
+referral. See `references/sequences.md`.
 
 ---
 
@@ -118,6 +119,18 @@ Full detail, copy intent, and stop conditions: `references/sequences.md`. Summar
 
 ---
 
+## Non-disruption contract (enforced)
+
+"Non-disruptive" is **verified**, not assumed. Full checklist: `references/non-disruption.md`. Minimum:
+
+- **Back up** the DB before migrating; migrations are **additive + reversible** (no altering existing
+  tables).
+- **Hooks are observe-only and wrapped in `try/catch`** — a failing observer never breaks
+  registration/login/checkout/payment.
+- **Ships paused** with a **global kill switch**; reuse the existing mail connection.
+- **Smoke test** all five core flows after install; run a **rollback drill** (disable → drop tables →
+  confirm untouched).
+
 ## Admin surface (what the admin gets)
 
 - **Email Automation** menu (top-level), with tabs:
@@ -139,6 +152,14 @@ Full UI spec: `references/admin-ui.md`.
 
 ---
 
+## When NOT to use
+
+- **No lawful consent basis** for marketing email (offer a consent flow first).
+- **Very small user bases** where automation noise outweighs value — send manually.
+- **Products where email isn't the channel** (SMS/push-first) — adapt the engine, don't force email.
+- **Regulated contexts** (health/finance) needing stricter review — get sign-off on copy + data flows.
+- **High-assurance transactional needs** — never route receipts/security email through this system.
+
 ## Deliverables the agent produces
 
 1. `references/discovery.md` → an **integration plan** for the specific app.
@@ -155,10 +176,16 @@ Full UI spec: `references/admin-ui.md`.
 ## References
 
 - `references/discovery.md` — study the app, find the admin, choose an integration path.
-- `references/sequences.md` — the full sequence catalog, timing, copy intent, stop conditions.
+- `references/non-disruption.md` — the enforced non-disruption contract (backup, reversible migrations,
+  hook isolation, smoke test, rollback drill).
+- `references/triggers.md` — exact detection rules for every trigger (cart-abandon, inactivity, etc.).
+- `references/sequences.md` — the full sequence catalog, precedence, timing, copy intent, stop conditions.
 - `references/email-copy.md` — personal "from one person" copy standards, subject lines, templates.
-- `references/sending-and-compliance.md` — scheduler, idempotency, caps, deliverability, CAN-SPAM/GDPR.
-- `references/admin-ui.md` — the dashboard, log (100/page), statistics chart, admin-only tables.
+- `references/sending-and-compliance.md` — scheduler, idempotency, caps, deliverability pre-flight.
+- `references/compliance.md` — consent, signed unsubscribe, preference center, bounce/complaint webhooks.
+- `references/admin-ui.md` — the dashboard, log (100/page), statistics chart, admin-only tables, WYSIWYG.
+- `references/reference-implementation.md` — the engine in pseudocode + SQL (locking, reaper, attribution).
+- `examples/worker.mjs` + `examples/worker.test.mjs` — executable, tested scheduler/worker core.
 - `examples/data-model.md` — DB schema.
 - `examples/sequence-config.json` — a concrete, editable sequence config.
 - `examples/email-templates.md` — sample rendered emails.

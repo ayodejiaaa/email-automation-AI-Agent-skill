@@ -112,6 +112,12 @@ Columns:
 
 - The caret opens a small timeline: sent (with date) and scheduled (with due date).
 - Respect privacy: only aggregate the data the admin already has access to.
+- **Performance:** these tables can be expensive to compute per page view — paginate, cache (short
+  TTL), and precompute aggregates. Never run an unbounded `purchased/abandoned` query on every product
+  page hit.
+- **Access control:** require the app's **admin permission** (not just "logged in"), and **audit** who
+  viewed. This is PII (email + phone) on a normal page.
+- **Rate-limit the test-send** and permission-gate it (abuse vector).
 
 ### Disabling these tables
 

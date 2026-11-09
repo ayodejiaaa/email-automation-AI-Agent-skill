@@ -76,15 +76,24 @@ until you say so.
 SKILL.md                              # the skill: workflow, sequences, non-negotiables
 references/
 ├── discovery.md                      # study the app, find admin, choose integration path
-├── sequences.md                      # full catalog: timing, copy intent, stop conditions
+├── non-disruption.md                 # enforced contract: backup, reversible migrations, smoke test
+├── triggers.md                       # exact detection rules (cart-abandon, inactivity, etc.)
+├── sequences.md                      # catalog: precedence, timing, copy intent, stop conditions
 ├── email-copy.md                     # personal copy standards, subject lines, templates
-├── sending-and-compliance.md         # cron, idempotency, caps, deliverability, CAN-SPAM/GDPR
-└── admin-ui.md                       # dashboard, log (100/page), stats chart, admin tables
+├── sending-and-compliance.md         # cron, idempotency, caps, deliverability pre-flight
+├── compliance.md                     # consent, signed unsubscribe, preference center, webhooks
+├── admin-ui.md                       # dashboard, log (100/page), stats chart, admin tables, WYSIWYG
+└── reference-implementation.md       # engine pseudocode + SQL (locking, reaper, attribution)
 examples/
+├── worker.mjs                        # executable scheduler/worker core
+├── worker.test.mjs                   # tests: idempotency, stop-conditions, caps, reaper
 ├── data-model.md                     # additive DB schema
 ├── sequence-config.json              # concrete, editable config
 └── email-templates.md                # sample rendered emails
+package.json                          # `npm test`
 ```
+
+Run the reference engine's tests with `npm test` (or `node --test examples/*.test.mjs`).
 
 ---
 
@@ -117,21 +126,22 @@ SKILL.md, and build the Email Automation section into this app:
 **Strengths**
 - **Behaviour-triggered, not blasts** — each email is personal and per-user.
 - **Proven timing** — 1h cart reminder, 24h social proof, 48–72h urgency; day-1 + 2-week post-purchase.
-- **Non-disruptive** — paused by default, additive schema, reuse existing mail.
-- **Tunable** — discounts default to 0 and are hidden at 0; delays/caps are configurable.
-- **Measurable** — conversion attribution + revenue chart.
-- **Compliant & deliverable** — SPF/DKIM/DMARC, unsubscribe, physical address, plain-text.
+- **Tested engine** — the scheduler/worker core ships as runnable code with tests (idempotency,
+  stop-conditions, frequency caps, crash recovery).
+- **Non-disruptive, verified** — additive + reversible migrations, hook isolation, smoke test, rollback
+  drill; paused by default.
+- **Operational compliance** — signed one-click unsubscribe, preference center, consent capture,
+  bounce/complaint webhooks, retention.
+- **Measurable & honest** — last-touch attribution with a holdout group to estimate true lift.
 
 **Limitations**
 - **Sending depends on the app's existing mail setup** — if that is broken, reminders fail too.
 - **Behaviour tracking quality varies** — a custom app without events may need polling/observers (lower
   fidelity than a clean event bus).
-- **Attribution ≠ causation** — conversions counted within a window may have happened anyway; treat the
-  stats as directional.
-- **Deliverability is earned** — new domains need warm-up; the skill is only as good as the sender
-  reputation.
-- **Timezone/quiet-hours** rely on knowing the user's local time; unknown timezones fall back to the
-  admin window.
+- **Attribution still needs volume** — even with last-touch + a holdout, small samples are noisy; treat
+  lift as directional until you have data.
+- **Deliverability is earned** — new domains need warm-up; the skill is only as good as sender reputation.
+- **Timezone/quiet-hours** need a stored user timezone; unknown timezones fall back to the admin window.
 
 ---
 
@@ -164,6 +174,12 @@ Quill, TipTap, Summernote, GrapesJS, MJML, email-safe HTML, inline CSS, merge to
 test send, email deliverability, SPF, DKIM, DMARC, spam trigger words, CAN-SPAM, GDPR, CASL, unsubscribe,
 List-Unsubscribe, plain text email, HTML email, email client agnostic, branded sending domain, sender
 reputation, email compliance.
+
+Non-disruptive, reversible migration, migration rollback, feature flag, kill switch, event observer,
+conversion attribution, holdout group, last-touch attribution, A/B subject testing, browse abandonment,
+back in stock, price drop, dunning, referral email, preference center, consent, double opt-in, signed
+unsubscribe token, one-click unsubscribe, bounce webhook, complaint webhook, retention policy,
+timezone-aware sending, quiet hours.
 
 Admin panel, admin menu, feature flag, non-disruptive, rollback, database schema, additive migration,
 email log, admin-only table, user profile link, call link, conversion chart.

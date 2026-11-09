@@ -65,6 +65,19 @@ double-sends. Use a unique `(enrollment_id, step_id)` constraint.
 
 ---
 
+## Deliverability pre-flight (check, don't assume)
+
+Before sending a single marketing email, **verify** (and warn the admin if not ready):
+
+- **SPF, DKIM, DMARC** published for the sending domain (aligned with the from-domain)?
+- Is the domain **warmed**? A new domain sending marketing to many recipients at once lands in spam.
+- Is this mailer **transactional-only** today? Suddenly adding marketing can hurt reputation — ramp up.
+- Is the **from-address on a branded domain** (never Gmail/Yahoo)?
+- Are bounce + complaint **webhooks** wired (see `compliance.md`)?
+
+Word lists are **secondary** — reputation is the primary signal. Use the safe-words list as hygiene,
+not as the strategy.
+
 ## Deliverability standards (email-client agnostic)
 
 - **Authentication:** SPF, DKIM, DMARC published for the sending domain; align the from-domain.
