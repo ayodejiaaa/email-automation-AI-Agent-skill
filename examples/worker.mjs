@@ -14,6 +14,9 @@ const nextId = () => `sched_${++idSeq}_${Math.random().toString(36).slice(2, 8)}
 
 export const KIND = { MARKETING: 'marketing', TRANSACTIONAL: 'transactional' };
 
+/** PATCH: one canonical form for email comparison. */
+export const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : null);
+
 // Lower number = higher priority (purchase wins over win-back).
 export const PRIORITY = {
   purchase: 1,
@@ -37,9 +40,12 @@ export class MemoryStore {
     this.sequences = new Map(); // key -> { kind, priority }
     this.channelConsent = new Map(); // `${userId}:${channel}` -> boolean
     this.channelSuppressed = new Map(); // `${userId}:${channel}` -> reason
+    this.userSuppressions = new Map(); // userId -> reason
+    this.stepKeys = new Set(); // `${enrollmentId}:${stepId}` — enforces uniqueness
   }
 
-  setUser(userId, { email, timezoneOffsetMinutes = 0, consentMarketing = true }) {
+  // PATCH: marketing consent is opt-in. A user has none until it is explicitly granted.
+  setUser(userId, { email, timezoneOffsetMinutes = 0, consentMarketing = false }) {
     this.users.set(userId, { email });
     this.timezones.set(userId, timezoneOffsetMinutes);
     this.consent.set(userId, consentMarketing);
@@ -69,14 +75,30 @@ export class MemoryStore {
   isChannelSuppressed(userId, channel) {
     return this.channelSuppressed.has(`${userId}:${channel}`);
   }
+  // PATCH: suppression is keyed by normalized email so "A@x.com " and "a@x.com" match.
   suppress(email, reason) {
-    if (email) this.suppressions.set(email, reason);
+    const key = normalizeEmail(email);
+    if (key) this.suppressions.set(key, reason);
   }
   isSuppressed(email) {
-    return this.suppressions.has(email);
+    return this.suppressions.has(normalizeEmail(email));
   }
   suppressionReason(email) {
-    return this.suppressions.get(email) ?? null;
+    return this.suppressions.get(normalizeEmail(email)) ?? null;
+  }
+  // PATCH: suppress by user id too, so an address change cannot revive an unsubscribed user.
+  suppressUser(userId, reason) {
+    this.userSuppressions.set(userId, reason);
+  }
+  isUserSuppressed(userId) {
+    return this.userSuppressions.has(userId);
+  }
+  /** Honour an unsubscribe: suppress the address and the user, and withdraw consent. */
+  unsubscribe(userId, email, reason = 'unsubscribed') {
+    this.suppress(email, reason);
+    this.suppress(this.emailOf(userId), reason);
+    this.suppressUser(userId, reason);
+    this.consent.set(userId, false);
   }
   excludeStep(userId, stepId) {
     this.exclusions.add(`${userId}:${stepId}`);
@@ -91,7 +113,13 @@ export class MemoryStore {
     return this.sequences.get(key) ?? { kind: KIND.MARKETING, priority: 5 };
   }
 
+  // PATCH: mirrors a UNIQUE (enrollment_id, step_id) constraint. Returns false on a duplicate.
   insertScheduled(row) {
+    if (row.enrollmentId != null) {
+      const key = `${row.enrollmentId}:${row.stepId}`;
+      if (this.stepKeys.has(key)) return false;
+      this.stepKeys.add(key);
+    }
     this.rows.set(row.id, {
       attempts: 0,
       deferrals: 0,
@@ -102,11 +130,25 @@ export class MemoryStore {
       channel: 'email',
       ...row,
     });
+    return true;
   }
+  // PATCH: highest priority first (lower number wins), then oldest due, so a batch limit
+  // cannot starve important rows.
   dueScheduled(now, limit) {
     return [...this.rows.values()]
       .filter((r) => r.status === 'scheduled' && r.dueAt <= now)
+      .sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9) || a.dueAt - b.dueAt)
       .slice(0, limit);
+  }
+  // PATCH: transient send failure — count the attempt and retry later.
+  retry(id, dueAt) {
+    const row = this.rows.get(id);
+    if (row && row.status === 'sending') {
+      row.status = 'scheduled';
+      row.lockedAt = null;
+      row.dueAt = dueAt;
+      row.attempts = (row.attempts ?? 0) + 1;
+    }
   }
   claim(id, now) {
     const row = this.rows.get(id);
@@ -196,12 +238,27 @@ export class MemoryStore {
       row.attempts = (row.attempts ?? 0) + 1;
     }
   }
-  eraseUser(userId) {
-    for (const [id, r] of [...this.rows]) if (r.userId === userId) this.rows.delete(id);
+  // PATCH: erase every per-user record, including channel consent, exclusions and step keys.
+  // The email-keyed suppression entry is deliberately KEPT when `keepSuppression` is true
+  // (default), so an erased user who unsubscribed is not re-mailed if re-imported. Document
+  // that retention in your privacy policy.
+  eraseUser(userId, { keepSuppression = true } = {}) {
+    const email = this.emailOf(userId);
+    for (const [id, r] of [...this.rows]) {
+      if (r.userId === userId) {
+        this.stepKeys.delete(`${r.enrollmentId}:${r.stepId}`);
+        this.rows.delete(id);
+      }
+    }
     this.sent = this.sent.filter((s) => s.userId !== userId);
     this.users.delete(userId);
     this.consent.delete(userId);
     this.timezones.delete(userId);
+    this.userSuppressions.delete(userId);
+    for (const key of [...this.channelConsent.keys()]) if (key.startsWith(`${userId}:`)) this.channelConsent.delete(key);
+    for (const key of [...this.channelSuppressed.keys()]) if (key.startsWith(`${userId}:`)) this.channelSuppressed.delete(key);
+    for (const key of [...this.exclusions]) if (key.startsWith(`${userId}:`)) this.exclusions.delete(key);
+    if (!keepSuppression && email) this.suppressions.delete(normalizeEmail(email));
   }
 }
 
@@ -209,14 +266,19 @@ export class EmailWorker {
   constructor({
     store,
     sendEmail,
-    isEligible = () => true,
+    isEligible, // PATCH: required. Defaulting to "always eligible" skipped stop conditions silently.
     now = () => Date.now(),
     maxPerDay = 1,
     dayMs = 24 * 3600 * 1000,
-    sendWindow = { start: 8, end: 21 },
+    // PATCH: sends allowed 09:00–20:00 local; quiet hours are 20:00–09:00 (end is exclusive).
+    sendWindow = { start: 9, end: 20 },
     maxAttempts = 3,
     maxDeferrals = 3,
+    retryDelayMs = 5 * 60 * 1000,
   }) {
+    if (typeof isEligible !== 'function') {
+      throw new TypeError('EmailWorker requires an isEligible({ userId, stopCondition }) function');
+    }
     Object.assign(this, {
       store,
       sendEmail,
@@ -227,6 +289,7 @@ export class EmailWorker {
       sendWindow,
       maxAttempts,
       maxDeferrals,
+      retryDelayMs,
     });
   }
 
@@ -246,7 +309,8 @@ export class EmailWorker {
 
     let scheduled = 0;
     for (const step of stepDefs) {
-      this.store.insertScheduled({
+      // PATCH: a repeated (enrollmentId, stepId) is ignored, so re-delivering an event is harmless.
+      const inserted = this.store.insertScheduled({
         id: nextId(),
         enrollmentId,
         sequenceKey,
@@ -259,15 +323,15 @@ export class EmailWorker {
         group,
         channel: step.channel ?? 'email',
       });
-      scheduled += 1;
+      if (inserted !== false) scheduled += 1;
     }
     return scheduled;
   }
 
+  // PATCH: minute-accurate, so +05:30 / +05:45 / -03:30 offsets give the right local hour.
   localHour(nowMs, offsetMinutes) {
-    const utcHour = Math.floor(nowMs / 3_600_000) % 24;
-    const shifted = utcHour + Math.floor(offsetMinutes / 60);
-    return ((shifted % 24) + 24) % 24;
+    const minuteOfDay = (((Math.floor(nowMs / 60_000) + offsetMinutes) % 1440) + 1440) % 1440;
+    return Math.floor(minuteOfDay / 60);
   }
 
   async processDue(limit = 100) {
@@ -294,7 +358,7 @@ export class EmailWorker {
       }
 
       if (row.kind === KIND.MARKETING) {
-        if (this.store.isSuppressed(email)) {
+        if (this.store.isSuppressed(email) || this.store.isUserSuppressed(row.userId)) {
           this.store.markCancelled(row.id, 'suppressed');
           report.cancelled += 1;
           continue;
@@ -310,6 +374,12 @@ export class EmailWorker {
           continue;
         }
       } else {
+        // PATCH: nothing to send to.
+        if (channel === 'email' && !email) {
+          this.store.markCancelled(row.id, 'no-address');
+          report.cancelled += 1;
+          continue;
+        }
         // Transactional bypasses marketing consent/suppression, but not undeliverable addresses.
         const reason = this.store.suppressionReason(email);
         if (reason === 'hard_bounce' || reason === 'complaint') {
@@ -327,7 +397,16 @@ export class EmailWorker {
       }
 
       // Stop condition: never email a user who already converted.
-      if (!this.isEligible({ userId: row.userId, stopCondition: row.stopCondition })) {
+      // PATCH: if the check itself throws we cannot prove the user still qualifies, so we do
+      // not send. The row is deferred (and cancelled once deferrals run out).
+      let eligible;
+      try {
+        eligible = await this.isEligible({ userId: row.userId, stopCondition: row.stopCondition });
+      } catch {
+        this.deferOrCancel(row, now, 'eligibility-error', report);
+        continue;
+      }
+      if (eligible !== true) {
         this.store.markCancelled(row.id, `stop:${row.stopCondition}`);
         report.cancelled += 1;
         continue;
@@ -354,8 +433,15 @@ export class EmailWorker {
         this.store.markSent(row.id, now);
         report.sent += 1;
       } catch (err) {
-        this.store.markFailed(row.id, err);
-        report.failed += 1;
+        // PATCH: retry transient failures with linear backoff; fail only when attempts run out.
+        // Providers should use `rowId` as an idempotency key so a retry cannot double-send.
+        if ((row.attempts ?? 0) + 1 < this.maxAttempts) {
+          this.store.retry(row.id, now + this.retryDelayMs * ((row.attempts ?? 0) + 1));
+          report.deferred += 1;
+        } else {
+          this.store.markFailed(row.id, err);
+          report.failed += 1;
+        }
       }
     }
     return report;
@@ -387,22 +473,34 @@ export class EmailWorker {
   }
 }
 
-/** Allowed send window (e.g. 08:00–21:00). Supports wrap-around (start > end). */
-export function isWithinAllowedSendWindow(hour, start = 8, end = 21) {
+/**
+ * Allowed SEND window, e.g. 09:00–20:00 means sends are allowed from 09:00 up to (not including)
+ * 20:00, so QUIET hours are 20:00–09:00. Supports wrap-around (start > end).
+ */
+export function isWithinAllowedSendWindow(hour, start = 9, end = 20) {
   if (start === end) return false;
   if (start < end) return hour >= start && hour < end;
   return hour >= start || hour < end;
 }
 
 /** Signed, unguessable unsubscribe token (HMAC-SHA256). */
-export function signUnsubscribeToken({ userId, email }, secret) {
-  const payload = Buffer.from(JSON.stringify({ userId, email })).toString('base64url');
+// PATCH: reject weak secrets, support an optional expiry, and keep the payload minimal.
+// NOTE the payload is signed, not encrypted: anyone holding the link can read it.
+const MIN_SECRET_LENGTH = 16;
+export function signUnsubscribeToken({ userId, email }, secret, { expiresAt } = {}) {
+  if (typeof secret !== 'string' || secret.length < MIN_SECRET_LENGTH) {
+    throw new Error(`unsubscribe secret must be a string of at least ${MIN_SECRET_LENGTH} characters`);
+  }
+  const body = { userId, email };
+  if (expiresAt != null) body.exp = expiresAt;
+  const payload = Buffer.from(JSON.stringify(body)).toString('base64url');
   const sig = createHmac('sha256', secret).update(payload).digest('base64url');
   return `${payload}.${sig}`;
 }
 
 /** Verify an unsubscribe token; returns the payload or null. */
-export function verifyUnsubscribeToken(token, secret) {
+export function verifyUnsubscribeToken(token, secret, { now = Date.now() } = {}) {
+  if (typeof secret !== 'string' || secret.length < MIN_SECRET_LENGTH) return null;
   const raw = String(token ?? '');
   const idx = raw.lastIndexOf('.');
   if (idx <= 0) return null;
@@ -413,7 +511,12 @@ export function verifyUnsubscribeToken(token, secret) {
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    // PATCH: validate the shape and honour expiry; never trust a parsed payload blindly.
+    if (!data || typeof data !== 'object') return null;
+    if (data.userId == null || typeof data.email !== 'string') return null;
+    if (data.exp != null && !(typeof data.exp === 'number' && data.exp > now)) return null;
+    return data;
   } catch {
     return null;
   }

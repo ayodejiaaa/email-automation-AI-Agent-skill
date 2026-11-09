@@ -52,7 +52,7 @@ double-sends. Use a unique `(enrollment_id, step_id)` constraint.
 ## Frequency caps & quiet hours (anti-spam)
 
 - **≤ 1 marketing email per user per 24h** (default), **≤ 4 per week** — configurable.
-- **Quiet hours:** only send between the user's local 08:00–21:00 (or admin-set window).
+- **Quiet hours:** 20:00–09:00 in the user's local time. Send only between 09:00 and 20:00 (end exclusive), or the admin-set window.
 - **Global suppression list:** unsubscribed, hard-bounced, spam-complained, or admin-blocked addresses
   are never emailed by any sequence.
 - **Engagement guard:** if a user hasn't opened anything in N sends, throttle or pause them.
