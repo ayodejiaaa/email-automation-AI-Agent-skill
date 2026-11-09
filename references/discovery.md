@@ -42,6 +42,34 @@
 Record the exact **event names or hook points** for: registration, first login, cart add, checkout
 start, purchase/order-paid, inactivity.
 
+## 4b. Understand the platform's purpose & derive extra sequences
+
+Email automation must fit the **product**, not a generic template. Before building, answer:
+
+- **What is this platform for?** (e-commerce, SaaS, fintech, booking, marketplace, social, content,
+  education, healthcare…)
+- **What is the core "aha"/activation event** that makes the product valuable?
+- **What critical account steps gate value?** email verification, profile completion, onboarding
+  setup, KYC/identity, billing/payment method, 2FA.
+- **What lifecycle moments exist?** trial, subscription/renewal, booking/appointment, delivery,
+  consumables, certificates/domains.
+- **What does the product's own marketing promise?** (read its homepage/docs — sequences should lead
+  the user to that promise.)
+
+From those answers, **propose additional reminder sequences** beyond the default catalog, e.g.:
+
+- Registered but **email not verified** → verification reminder.
+- **Profile incomplete** (marketplace/social/dating/professional) → profile-completion reminder.
+- **Onboarding/setup incomplete** (SaaS) → setup reminder.
+- **KYC pending** (fintech) → identity-verification reminder.
+- **No payment method / trial ending** (SaaS) → billing reminder.
+- **Booking/appointment** → reminder before the appointment.
+- **Renewal/expiry** (subscriptions, domains, certificates) → renewal reminder.
+
+Add a **sequence shortlist** to the integration plan: the default sequences that apply **plus** the
+platform-specific ones, each with trigger + stop condition. **Never add a sequence the platform can't
+detect or act on.**
+
 ## 5. Decide the integration path
 
 Choose the least invasive option that matches the stack:

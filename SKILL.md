@@ -39,6 +39,9 @@ Study the app thoroughly and produce a short **integration plan**. See `referenc
 - Detect the stack, framework, ORM/DB, auth, sessions, the **admin panel** (or note its absence).
 - Find the existing **email connection** (SMTP/provider SDK) — reuse it; never add a second one.
 - Map **products**, **cart/checkout**, **orders**, **users**, and the events needed.
+- **Understand the platform's purpose and business model** (e-commerce, SaaS, fintech, booking, …), its
+  activation event, and its critical account steps — then **propose extra reminder sequences** that fit
+  (email verification, profile completion, onboarding, KYC, trial/billing, booking, renewal…).
 - If there is **no admin panel**, ask the user whether to create a minimal one.
 
 ### 1. Design
@@ -90,6 +93,10 @@ incentive on very low-value carts. (`references/sequences.md`.)
 **Precedence:** a user is in at most one promotional sequence — purchase > cart > browse > welcome >
 no-login > inactive > win-back. Extra sequences: browse-abandon, back-in-stock, price-drop, dunning,
 referral. See `references/sequences.md`.
+
+**Plus platform-derived sequences** discovered from the app's purpose — e.g. **email verification,
+profile completion, onboarding setup, KYC, billing/trial ending, booking reminders, renewals**. Only add
+the ones the platform can detect and act on (`references/sequences.md`).
 
 ---
 
@@ -167,7 +174,8 @@ Full UI spec: `references/admin-ui.md`.
 
 ## Deliverables the agent produces
 
-1. `references/discovery.md` → an **integration plan** for the specific app.
+1. `references/discovery.md` → an **integration plan** for the specific app, including a **proposed
+   sequence shortlist** derived from the platform's purpose.
 2. New tables/migrations + the scheduler + send worker (additive).
 3. The event hooks (observe-only).
 4. The admin "Email Automation" page + tabs + statistics chart, including a **free WYSIWYG editor**,

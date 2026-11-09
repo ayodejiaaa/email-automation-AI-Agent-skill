@@ -167,6 +167,30 @@ promotional sequences the same day (also enforced by frequency caps).
 | **Referral ask** | Positive review / high NPS | ~3 days after review | One ask, then stop |
 | **Replenishment** | Consumable purchase | ~day 45–60 | Reorder link |
 
+## Platform-derived sequences (add the ones that fit)
+
+These are the sequences you **decide to add after scouting the platform** (`discovery.md` §4b). Add only
+the ones the product can actually detect and act on — never a sequence whose trigger doesn't exist.
+
+| Sequence | Add when | Trigger | Timing | Stop when |
+|----------|----------|---------|--------|-----------|
+| **Email verification** | platform requires/benefits from a verified email | registration, `email_verified = false` | 1h → 24h → 72h | verified |
+| **Profile completion** | profile gates value (marketplace/social/pro) | profile incomplete after registration/login | 1h → 24h → 5d | profile complete |
+| **Onboarding / setup** | app needs setup to deliver value (SaaS) | onboarding incomplete | 1h → 24h → 72h | onboarding complete |
+| **KYC / identity** | fintech/regulated | KYC pending | 1h → 24h → 72h | KYC approved |
+| **Billing / payment method** | SaaS paid or trial | no payment method, or trial ending | 3d before trial end → end → 3d after | subscribed |
+| **Trial ending** | SaaS trial | trial ends within N days | 3d → 1d → expired | upgrade |
+| **Feature adoption** | app with a key feature | user hasn't used feature X | 1d → 5d | feature used |
+| **Security / 2FA setup** | security-sensitive | no 2FA after N days | 7d → 30d | 2FA enabled |
+| **Policy change / re-consent** | legal | policy updated | 0d → 7d → 30d | accepted |
+| **Booking / appointment** | booking platforms | appointment scheduled | 24h before → 2h before | attended/cancelled |
+| **Renewal / expiry** | subscriptions, domains, certificates | renewal/expiry approaching | 30d → 7d → 1d before | renewed |
+| **First → second purchase** | e-commerce | first purchase, no second | 14d → 30d | second purchase |
+| **Birthday / anniversary** | consumer apps | the date | day-of | — |
+
+**Rules:** same stop-conditions, precedence, and frequency caps as every other sequence. Prefer 2 touches
+over 4. Document in the integration plan why each was chosen (which platform step it unblocks).
+
 ## Implementation reference
 
 The scheduling/worker logic (idempotency, stop-conditions, frequency caps, reaper) is implemented and

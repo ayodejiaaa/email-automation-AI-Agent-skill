@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Platform scouting & derived sequences
+- **Scout the platform's purpose** during discovery and derive the sequences that fit — added a
+  **platform-derived sequence library** (email verification, profile completion, onboarding, KYC,
+  billing/trial, trial ending, feature adoption, 2FA, policy re-consent, booking, renewal, first→second
+  purchase, birthday) in `references/sequences.md` and `references/discovery.md` §4b.
+
 ### Admin controls & health
 - **Add / reorder / delete sequence steps** from the admin (new steps also schedule for active enrolments).
 - **Users tab** — search a user by email, expand their sequence with the down caret, **cancel a

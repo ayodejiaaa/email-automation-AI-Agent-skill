@@ -18,10 +18,11 @@ it paused so I can review and turn it on.
 > inside your app's admin panel — turning user behaviour into personal, proven lifecycle emails that
 > increase return, purchase, and retention.
 
-Give an agent (Claude Code, Codex, Cursor, OpenCode, …) this skill and it will: study your app, find
-the admin panel, add an **Email Automation** menu, wire up the right sequences (welcome, abandoned
-cart, post-purchase, upsell, win-back…), and ship it **paused** so nothing breaks and nothing sends
-until you say so.
+Give an agent (Claude Code, Codex, Cursor, OpenCode, …) this skill and it will: **scout your platform
+and understand its purpose**, find the admin panel, add an **Email Automation** menu, wire up the
+sequences that fit (welcome, abandoned cart, post-purchase, upsell, win-back, **email verification,
+profile completion, onboarding, KYC, trial/billing, booking, renewal**…), and ship it **paused** so
+nothing breaks and nothing sends until you say so.
 
 ---
 
@@ -32,6 +33,7 @@ until you say so.
 | **Sequences** | 8 lifecycle sequences, each on/off, with editable delays, discounts, and copy |
 | **Template editor** | a **free, self-hosted WYSIWYG editor** (TinyMCE Community; or Quill/TipTap/Summernote/GrapesJS) to edit each email body — email-safe HTML, merge tokens, preview + test-send |
 | **Editable sequences** | admin can **add / reorder / delete steps**; a new step also schedules for active enrolments |
+| **Platform-aware sequences** | scouts your app's purpose and adds the reminders that fit — **email verification, profile completion, onboarding, KYC, billing/trial, booking, renewal**… |
 | **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |
 | **User controls** | search a user by email, expand their sequence with a caret, **cancel one specific email** or **exclude the user** from all automation |
 | **Recipients log** | every user + emails sent/scheduled, **paginated by 100**, with *when* and *why* |
@@ -203,6 +205,11 @@ timezone-aware sending, quiet hours.
 
 Admin panel, admin menu, feature flag, non-disruptive, rollback, database schema, additive migration,
 email log, admin-only table, user profile link, call link, conversion chart.
+
+Email verification reminder, verify account email, complete profile email, profile completion reminder,
+onboarding reminder, KYC reminder, identity verification email, trial ending email, billing reminder,
+renewal reminder, subscription renewal email, booking reminder, appointment reminder, feature adoption
+email, account setup reminder, activation reminder.
 
 AI agent skill, Claude Code skill, Claude skill, Cursor rules, AI coding rules, agent prompt, system
 prompt, LLM rules, agentic development, developer skill, engineering skill, product skill, growth
