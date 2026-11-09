@@ -9,6 +9,11 @@ per view**, tuck secondary/destructive actions into an overflow (`⋯`) menu, an
 behind a drawer or a collapsible "Advanced" section. If a control doesn't help the current task, hide
 it.
 
+**Design with the UI/UX skill.** Build this page under the **`ui-ux-20-laws`** skill (if available):
+apply its **Audit → Implement → Trace** protocol and its design tokens. `references/admin-design-laws.md`
+maps every decision on this page to a law, with the Trace block and the pre-ship checklist. (If that
+skill isn't available, the same rules apply inline there.)
+
 ---
 
 ## Navigation

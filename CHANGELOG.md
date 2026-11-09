@@ -2,6 +2,11 @@
 
 ## [1.0.0] — 2026-11-09
 
+### Design
+- **The admin page is now built with the `ui-ux-20-laws` skill** — added
+  `references/admin-design-laws.md` (per-surface law map, Audit → Implement → Trace, pre-ship
+  checklist) and wired it into the workflow, admin-ui, and README.
+
 ### Hardening (review items 2–10)
 - **Worker now enforces** consent, holdout group, sequence precedence (max 1 active marketing), admin
   per-step exclusions, timezone-aware quiet hours, frequency caps, retry caps and max deferrals, and

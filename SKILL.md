@@ -60,7 +60,9 @@ Study the app thoroughly and produce a short **integration plan**. See `referenc
   into enrolment — **without changing their behaviour** (observe, don't intercept).
 
 ### 4. Admin UI
-- Add a top-level **"Email Automation"** menu with tabs: **Sequences · Recipients · Statistics ·
+- Build the page under the **`ui-ux-20-laws` skill** (if available): apply its Audit → Implement → Trace
+  protocol, design tokens, and the per-surface map in `references/admin-design-laws.md`.
+- Add a top-level **"Email Automation"** menu with tabs: **Sequences · Users & recipients · Statistics ·
   Settings**. See `references/admin-ui.md`.
 - Add **admin-only** purchased/abandoned tables at the bottom of product and checkout pages.
 
@@ -119,8 +121,9 @@ the ones the platform can detect and act on (`references/sequences.md`).
    + physical address, no spam trigger words. See `references/sending-and-compliance.md`.
 8. **Everything auditable.** Every send is logged (who, which sequence/step, when, why) and every
    scheduled email is visible in the admin.
-9. **Beauty + seamlessness.** Match the app's design tokens; the admin section must look native. Use
-   the `reviews-to-features`-style rigor: clear hierarchy, 44px targets, accessible contrast.
+9. **Beauty + seamlessness.** Build the page under the **`ui-ux-20-laws` skill** (if available) — apply
+   its laws, tokens, and Audit → Implement → Trace protocol (see `references/admin-design-laws.md`).
+   Match the app's design tokens so it looks native; clear hierarchy, 44px targets, accessible contrast.
 10. **Template editor: reuse before adding.** If the app already has a WYSIWYG editor, **reuse it**
     (configured for email). Otherwise add a **free, self-hosted** one (TinyMCE Community / Quill /
     TipTap / Summernote / GrapesJS). Output must be **email-safe** (inline CSS, tables, ~600px, no JS),
@@ -211,6 +214,7 @@ Full UI spec: `references/admin-ui.md`.
 - `references/compliance.md` — consent, signed unsubscribe, preference center, bounce/complaint webhooks.
 - `references/admin-ui.md` — the dashboard, users tab (search/cancel/exclude), log (100/page), stats,
   admin-only tables, WYSIWYG, add/edit steps.
+- `references/admin-design-laws.md` — the page mapped to the 20 UI/UX laws (Audit → Trace → checklist).
 - `references/health-checks.md` — pause / cron-not-running / no-transport warnings with fix guidance.
 - `references/wysiwyg.md` — reuse an existing editor, else add one; email-safe pipeline.
 - `references/quickstart.md` — the one-page path.

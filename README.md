@@ -35,6 +35,7 @@ nothing breaks and nothing sends until you say so.
 | **Editable sequences** | admin can **add / reorder / delete steps**; a new step also schedules for active enrolments |
 | **Sequence controls** | **Start / Pause / Delete** each sequence — delete requires typing **`delete`** in a confirmation modal, then soft-deletes (restorable) |
 | **Clean admin** | calm, uncluttered layout — ≤4 tabs, one primary action per view, details in drawers, secondary actions in an overflow menu |
+| **Designed with the UI/UX laws skill** | the page is built under `ui-ux-20-laws` — every decision (tabs, targets, drawers, states) is mapped to a law, with a Trace block + pre-ship checklist |
 | **Platform-aware sequences** | scouts your app's purpose and adds the reminders that fit — **email verification, profile completion, onboarding, KYC, billing/trial, booking, renewal**… |
 | **Health checks** | banners when emails can't send: **paused**, **cron not running** (with exact fix commands), **no SMTP/API key** (with setup steps) |
 | **User controls** | search a user by email, expand their sequence with a caret, **cancel one specific email** or **exclude the user** from all automation |
