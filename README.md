@@ -1,5 +1,19 @@
 # Email Automation — AI Agent Skill
 
+> **Ask your AI agent to use this skill to create email automation for your product — to improve sales
+> and user returns.** One sentence is all it takes, and it builds out an elaborate, clean Email
+> Automation section in your admin page, ready to go.
+
+**Copy this prompt into your AI agent:**
+
+```
+Use the email-automation skill to build a complete, ready-to-go Email Automation section in my app's
+admin for {{PRODUCT}} — automated lifecycle reminders that improve sales and user returns — and ship
+it paused so I can review and turn it on.
+```
+
+---
+
 > **This is an AI agent skill.** It builds a complete, non-disruptive **"Email Automation"** section
 > inside your app's admin panel — turning user behaviour into personal, proven lifecycle emails that
 > increase return, purchase, and retention.
